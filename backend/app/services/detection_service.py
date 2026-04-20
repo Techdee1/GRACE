@@ -10,6 +10,8 @@ from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from app.models import Alert, AlertStatus, Entity, PatternType, Transaction
+from app.models.enums import DecisionStatus
+from app.services.audit_service import write_audit_event
 
 
 UTC = timezone.utc
@@ -72,6 +74,25 @@ def _create_alert(
         status=AlertStatus.open,
     )
     db.add(alert)
+    db.flush()
+
+    write_audit_event(
+        db=db,
+        action="alert_created",
+        entity_ids=[str(x) for x in entity_ids],
+        alert_id=alert.id,
+        model_version="heuristic_v1",
+        decision=DecisionStatus.pending,
+        payload_json={
+            "alert_id": str(alert.id),
+            "pattern_type": pattern_type.value,
+            "risk_score": str(risk_score),
+            "reason": reason,
+            "entity_ids": [str(x) for x in entity_ids],
+            "transaction_ids": [str(x) for x in transaction_ids],
+            "subgraph_json": subgraph_json,
+        },
+    )
     return alert
 
 

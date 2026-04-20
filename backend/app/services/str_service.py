@@ -4,8 +4,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.models import Alert, STRDraft
+from app.models import Alert, DecisionStatus, STRDraft
 from app.schemas.str_drafts import STRDraftResponse
+from app.services.audit_service import write_audit_event
 from app.services.str_generation_service import STRGenerationError, str_generation_service
 
 
@@ -54,6 +55,26 @@ def generate_str_draft(db: Session, alert_id: UUID, reviewer_notes: str | None) 
     db.add(row)
     db.commit()
     db.refresh(row)
+
+    write_audit_event(
+        db=db,
+        action="str_generated",
+        entity_ids=[str(x) for x in alert.entity_ids],
+        alert_id=alert.id,
+        model_version=row.model_version,
+        decision=DecisionStatus.pending,
+        payload_json={
+            "str_id": str(row.id),
+            "alert_id": str(alert.id),
+            "provider": row.provider,
+            "model_name": row.model_name,
+            "model_version": row.model_version,
+            "decision": row.decision.value,
+            "content_json": row.content_json,
+        },
+    )
+    db.commit()
+
     return _to_response(row)
 
 

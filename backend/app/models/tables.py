@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, event
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -106,3 +106,11 @@ class AuditLog(Base):
         Enum(DecisionStatus, name="audit_decision_status"), nullable=False, default=DecisionStatus.pending
     )
     payload_json: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+def _raise_audit_immutable(*args, **kwargs) -> None:
+    raise ValueError("audit_log is immutable and cannot be updated or deleted")
+
+
+event.listen(AuditLog, "before_update", _raise_audit_immutable)
+event.listen(AuditLog, "before_delete", _raise_audit_immutable)
