@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.core.database import SessionLocal
 from app.core.redis_client import redis_client
 from app.models import Entity, IngestJob, JobStatus, Transaction
+from app.services.detection_service import run_heuristic_detection
 from app.services.graph_service import graph_service
 
 
@@ -97,6 +98,8 @@ def process_job(job_id: str) -> None:
             _upsert_graph_from_record(db, tx)
             processed_count += 1
             job.processed_records = processed_count
+
+        run_heuristic_detection(db)
 
         job.status = JobStatus.completed
         job.processed_records = processed_count
