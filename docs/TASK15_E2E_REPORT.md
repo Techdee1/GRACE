@@ -34,16 +34,15 @@ Scope: Phase 1 pipeline validation
   - `shell_director_web`: 2
   - `layered_transfer_chain`: 1
 - Alerts and entity/risk endpoints returned successful responses.
-- Audit log contains expected `alert_created` entries.
+- STR generation succeeded after runtime key validation.
+- Audit log contains expected `alert_created` and `str_generated` entries.
 
-## Blocker
+## STR Validation
 
-`POST /api/v1/str/generate` returned `503` because Groq returned `401 Invalid API Key` at provider level.
-
-- Runtime key variable is present in backend container.
-- Provider authentication failure prevents STR draft creation in this run.
+- `POST /api/v1/str/generate` returned success with provider `groq`.
+- `GET /api/v1/str/{id}` returned persisted draft with decision `pending`.
+- Audit log includes `str_generated` with valid SHA-256 payload hash.
 
 ## Conclusion
 
-The end-to-end pipeline is validated through ingest, graph updates, detection, alerting, and risk retrieval.
-STR generation remains blocked pending a valid Groq API key.
+The full end-to-end pipeline is validated through ingest, graph updates, detection, alerting, risk retrieval, STR generation, and audit logging.

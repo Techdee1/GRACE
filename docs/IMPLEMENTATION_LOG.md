@@ -351,3 +351,12 @@
 - STR generation final step is blocked pending a valid Groq API key.
 
 - Status: Completed with external blocker
+
+### Task 15 Addendum - Blocker Resolved
+
+- Re-ran STR generation with a valid runtime Groq key and recreated backend/worker services.
+- `POST /api/v1/str/generate` succeeded for a live alert.
+- `GET /api/v1/str/{id}` returned the persisted draft with provider/model metadata.
+- Verified `str_generated` entries in `audit_log`.
+
+- Updated Status: Completed (fully validated)

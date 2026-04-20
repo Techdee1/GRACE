@@ -27,15 +27,9 @@
   - 500 entities
   - 2000 transactions
   - 3 embedded laundering topologies
-- End-to-end ingestion and detection verified with generated alerts.
+- End-to-end ingestion, detection, and STR draft generation verified with generated alerts.
 
-## Open External Blocker
+## Current Status
 
-- STR generation is provider-blocked in current environment:
-  - Groq API responds with `401 Invalid API Key`.
-- Impact:
-  - `POST /api/v1/str/generate` returns `503` until a valid key is provided.
-
-## Next Immediate Step
-
-- Provide/rotate a valid Groq API key, then re-run Task 15 STR generation and finalize sign-off.
+- Phase 1 scope is functionally complete and validated end-to-end.
+- Remaining work is operational hardening and deployment preparation.
