@@ -1,0 +1,113 @@
+{
+  "seed": 20260420,
+  "generated_at": "2026-04-20T15:51:44+00:00",
+  "patterns": [
+    {
+      "pattern_type": "pos_cash_out_ring",
+      "source_entity_ids": [
+        "c7cb6a8e-2e12-4fe9-9aa3-ecf21245ae32",
+        "fecb0bbb-d25c-460c-8dd5-00b2fa11e989",
+        "534555c3-563a-4220-8d86-cfbb03903b7a",
+        "fa62385e-9ad2-4690-b425-4da0b413b723",
+        "316b20e5-df7d-472c-9618-054cf7e8067a",
+        "8d92312b-20a7-4219-b77a-eb8205e6c210",
+        "52856f95-a3dc-46d0-a1aa-c84b6af1dedc",
+        "179171d3-4942-48ac-998b-49a61631a306",
+        "6ec54630-1843-46d3-ab32-224f45ad6d4f",
+        "7f9774de-f218-40df-be80-85ddfdd2d27a",
+        "00845909-8591-4181-89a1-d99f8a44012d",
+        "0fbedf4f-d142-4113-9ba5-36bdaf5b04c9"
+      ],
+      "beneficiary_entity_id": "da3ddee3-904f-4a08-988c-5d774f98d373",
+      "transaction_ids": [
+        "442807d6-1a7d-40f5-91e8-314698aa7a57",
+        "8c4a0c2e-28c8-4d83-8edc-fc389c6c9d61",
+        "c46daf9c-3560-4809-aed8-bb4cb2b8149a",
+        "7e8967c6-6473-41cb-803e-697a74ee8d84",
+        "c0938e94-e655-4264-9fe9-d56b0cf72e8b",
+        "59012463-9d28-41a6-808b-984deb26d57e",
+        "daa48403-0d30-4655-aef4-2700c99717bd",
+        "9bc63c04-72c6-4876-8942-ebe6ae8d698d",
+        "a2e3fd78-e9ce-4e4a-8925-819bab03c956",
+        "c02dcc85-9465-4a0e-89cd-8a4fd6a475ec",
+        "b08057a5-69e5-4123-baca-dc8a542040c7",
+        "7342dc85-f8b5-4b09-b4c5-f110b0891bbf",
+        "350ba43a-3859-494b-a70d-47788d54a7dc",
+        "dd0979bb-ed6f-4ca6-9e56-7afb6ac625bf",
+        "1008bfae-6f29-4c20-9826-62eeae403341",
+        "7fe12ebd-472f-482c-8885-6377f98df9f9",
+        "2fef1fe7-dbf8-4bb2-90a0-d8dfaa26caf4",
+        "4b651df1-a1c5-4b4e-aaad-0c6b024b10a6",
+        "7db5df68-1b41-4ea3-97bd-cfb09cd16703",
+        "54c7879a-fa2f-49b5-b6f9-1b94d34f87d2",
+        "28d44dfd-804b-445a-a73a-b30bad06e793",
+        "70053ddf-0032-42af-9813-ff17c7ba10aa",
+        "91c096f9-f9c4-4684-87b1-be0eab4c458e",
+        "f88e788e-b589-4f97-a643-9ce9d5457503"
+      ]
+    },
+    {
+      "pattern_type": "shell_director_web",
+      "business_entity_ids": [
+        "9dbab23a-ab81-4748-8ad0-1004e61347e3",
+        "88ea7fb5-c7c7-4427-b5f1-285ea45f2b89",
+        "9171b146-3327-43c3-b13d-e885548ccde5",
+        "a5ce3110-385f-4928-9fcf-0b95bd01fa0c",
+        "573f163c-5233-4aa1-8fa2-10556d40c45f",
+        "7d8b5982-09de-48df-9a26-9beff5b55da8",
+        "f3c245ab-ad6d-42c9-add2-3721eb5b4b24",
+        "41f093f4-b180-4faf-bbdc-587e93259de9"
+      ],
+      "director_entity_ids": [
+        "2fe812ff-14c4-4d82-92a8-b7f157d7d2c5",
+        "5e59c088-8f0f-41a4-a257-32133a34746f"
+      ],
+      "transaction_ids": [
+        "3aab4668-6e26-426c-8ee1-609ff6d216dc",
+        "4446b137-1810-4317-b4e3-daf842ce7823",
+        "e1ecf257-cd12-47b3-a66c-3203df0d7955",
+        "74ee13ff-98ad-481f-a898-1a4e3994f5e5",
+        "0f293ad2-769c-4d46-9dd1-647c052e3fb7",
+        "83f2ad53-1224-4372-9fb7-263e44d11962",
+        "7e77468b-562d-49e5-8408-9d66ecaf10fc",
+        "51782b17-d489-4b1a-af2d-15db3204bfcb"
+      ],
+      "shared_address": "18 Creek Road, Apapa, Lagos, Nigeria"
+    },
+    {
+      "pattern_type": "layered_transfer_chain",
+      "origin_entity_id": "2cd1873a-254b-4bf2-8d0b-f48c226ef29a",
+      "intermediate_entity_ids": [
+        "6d611d78-30d6-49f7-89a5-1f78f4510f11",
+        "8d92312b-20a7-4219-b77a-eb8205e6c210",
+        "ae6ee5b6-e9f3-4230-a3f7-3954b5c2081e",
+        "91b8ea53-3722-40d0-85f0-a1a179f61106",
+        "9f3b3414-05b8-48ea-a89c-a231496396a4"
+      ],
+      "recon_entity_id": "b1707d4c-5f55-48ce-90f4-6cd2a4e4ade1",
+      "destination_entity_id": "4ded56c0-af72-42c7-8e46-3080ed67ab6c",
+      "transaction_ids": [
+        "e3b09c98-77f7-4a4e-874e-b85b4d04a6b3",
+        "930ebf30-0673-4a08-8ffc-a134d5649dce",
+        "4dea5374-483e-433b-b729-e7c3d35f5476",
+        "38d46e2e-55d6-42c4-9192-c4adaed039b7",
+        "f7b6ca11-cf7a-4587-87da-811379022573",
+        "127af5b7-feb1-4de0-b41c-d6d2410c638e",
+        "2e21c163-909f-40f0-95da-8ad41d0cffcc",
+        "5fc34be6-8c2a-46b8-844e-98318bdd1db7",
+        "8659cece-eeff-4c45-9e3a-74c70e7fbfe9",
+        "3759d78a-2254-4695-91aa-726e7c462a61",
+        "9cfd86bf-f202-4cfe-a11f-2259f7e7c671"
+      ],
+      "chain_id": "CHAIN-22276bbcc9"
+    }
+  ],
+  "summary": {
+    "entity_count": 500,
+    "person_count": 350,
+    "business_count": 100,
+    "account_count": 50,
+    "transaction_count": 2000,
+    "time_window_days": 90
+  }
+}

@@ -1,16 +1,17 @@
-# React + Vite
+# GRACE
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Graph-based Risk And Compliance Engine
 
-Currently, two official plugins are available:
+GRACE is an AI-powered AML/KYC intelligence platform for Nigerian financial institutions. It models financial entities and transactions as a live graph, detects suspicious network patterns, and supports faster, regulator-ready reporting.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Project Docs
 
-## React Compiler
+- Extracted PRD markdown: [GRACE_PRD.md](GRACE_PRD.md)
+- Source PRD PDF: [ComplianceGraph_PRD.pdf](ComplianceGraph_PRD.pdf)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Core Concept
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Build a live relationship graph across people, businesses, accounts, and transactions.
+- Use graph-native ML (for example, GraphSAGE/GAT patterns) to detect hidden laundering behavior.
+- Propagate risk scores across connected entities.
+- Support human-reviewed STR drafting with full auditability.
