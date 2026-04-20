@@ -11,7 +11,8 @@ from sqlalchemy import select
 
 from app.core.database import SessionLocal
 from app.core.redis_client import redis_client
-from app.models import IngestJob, JobStatus, Transaction
+from app.models import Entity, IngestJob, JobStatus, Transaction
+from app.services.graph_service import graph_service
 
 
 REDIS_INGEST_QUEUE_KEY = "ingest:jobs:queue"
@@ -46,6 +47,36 @@ def _upsert_transaction_record(db_session, record: dict) -> Transaction:
     return tx
 
 
+def _upsert_graph_from_record(db_session, tx: Transaction) -> None:
+    source_entity = db_session.get(Entity, tx.source_entity_id)
+    destination_entity = db_session.get(Entity, tx.destination_entity_id)
+    if source_entity is None or destination_entity is None:
+        raise ValueError("Source or destination entity missing for graph upsert")
+
+    graph_service.upsert_entity_node(
+        entity_id=source_entity.id,
+        entity_type=source_entity.entity_type,
+        full_name=source_entity.full_name,
+        address=source_entity.address,
+    )
+    graph_service.upsert_entity_node(
+        entity_id=destination_entity.id,
+        entity_type=destination_entity.entity_type,
+        full_name=destination_entity.full_name,
+        address=destination_entity.address,
+    )
+    graph_service.upsert_transaction_edge(
+        source_entity_id=tx.source_entity_id,
+        destination_entity_id=tx.destination_entity_id,
+        transaction_id=tx.id,
+        reference=tx.reference,
+        amount=tx.amount,
+        currency=tx.currency,
+        occurred_at=tx.occurred_at,
+        channel=tx.channel,
+    )
+
+
 def process_job(job_id: str) -> None:
     db = SessionLocal()
     try:
@@ -62,7 +93,8 @@ def process_job(job_id: str) -> None:
 
         processed_count = 0
         for record in records:
-            _upsert_transaction_record(db, record)
+            tx = _upsert_transaction_record(db, record)
+            _upsert_graph_from_record(db, tx)
             processed_count += 1
             job.processed_records = processed_count
 
