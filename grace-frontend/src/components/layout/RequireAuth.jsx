@@ -1,8 +1,4 @@
-import { Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/authStore'
-
+// Phase 1: auth deferred — fully open access
 export function RequireAuth({ children }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  if (!isAuthenticated) return <Navigate to="/login" replace />
   return children
 }

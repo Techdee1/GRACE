@@ -4,21 +4,21 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
 import { GraphControls } from '@/components/graph/GraphControls'
 import { useGraphLayout } from '@/components/graph/useGraphLayout'
+import { useGraphData } from '@/hooks/useGraphData'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
-import { useGraph } from '@/hooks/useGraph'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 export default function GraphExplorer() {
   const navigate = useNavigate()
-  const { isLoading } = useGraph()
   const [riskFilter, setRiskFilter] = useState('ALL')
   const [selectedNode, setSelectedNode] = useState(null)
   const [key, setKey] = useState(0)
 
-  const { nodes, links } = useGraphLayout(riskFilter)
+  const { nodes: rawNodes, links: rawLinks, isLoading } = useGraphData()
+  const { nodes, links } = useGraphLayout(riskFilter, { nodes: rawNodes, links: rawLinks })
 
   return (
     <div className="flex flex-col h-full -m-6">

@@ -17,6 +17,7 @@ export default function Dashboard() {
 
   const openAlerts = alerts?.filter((a) => a.status === 'OPEN').length ?? 0
   const highRiskAlerts = alerts?.filter((a) => a.riskLevel === 'HIGH').length ?? 0
+  const totalAlerts = alerts?.length ?? 0
 
   return (
     <div>

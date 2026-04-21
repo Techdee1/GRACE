@@ -1,10 +1,9 @@
-export function formatNaira(kobo) {
-  const naira = kobo / 100
+export function formatNaira(naira) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(naira)
 }
 
-export function formatNairaShort(kobo) {
-  const n = kobo / 100
+export function formatNairaShort(naira) {
+  const n = parseFloat(naira) || 0
   if (n >= 1_000_000_000) return `₦${(n / 1_000_000_000).toFixed(1)}B`
   if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `₦${(n / 1_000).toFixed(0)}k`
@@ -20,6 +19,10 @@ export function formatDateTime(iso) {
 }
 
 export const PATTERN_LABELS = {
+  pos_cash_out_ring: 'POS Cash-Out Ring',
+  shell_director_web: 'Shell Director Web',
+  layered_transfer_chain: 'Layered Transfer Chain',
+  // legacy mock keys kept for fallback
   POS_RING: 'POS Cash-Out Ring',
   SHELL_WEB: 'Shell Director Web',
   LAYERED_CHAIN: 'Layered Transfer Chain',

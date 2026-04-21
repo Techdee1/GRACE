@@ -1,8 +1,10 @@
 import { apiClient } from './client'
-import { mockEntities } from '@/utils/mockData'
 
 export const entitiesApi = {
-  getAll: () => apiClient.get('/entities').then((r) => r.data).catch(() => mockEntities),
-  getById: (id) => apiClient.get(`/entities/${id}`).then((r) => r.data).catch(() => mockEntities.find((e) => e.id === id)),
-  search: (query) => apiClient.get(`/entities/search?q=${query}`).then((r) => r.data).catch(() => mockEntities.filter((e) => e.canonicalName.toLowerCase().includes(query.toLowerCase()))),
+  getAll: (limit = 200, offset = 0) =>
+    apiClient.get(`/entities?limit=${limit}&offset=${offset}`).then((r) => r.data),
+  getById: (id) =>
+    apiClient.get(`/entities/${id}`).then((r) => r.data),
+  getRisk: (id) =>
+    apiClient.get(`/entities/${id}/risk`).then((r) => r.data),
 }

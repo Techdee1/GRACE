@@ -1,10 +1,13 @@
 import { apiClient } from './client'
-import { mockSTRs } from '@/utils/mockData'
 
 export const strApi = {
-  getAll: () => apiClient.get('/str').then((r) => r.data).catch(() => mockSTRs),
-  getById: (id) => apiClient.get(`/str/${id}`).then((r) => r.data).catch(() => mockSTRs.find((s) => s.id === id)),
-  approve: (id) => apiClient.post(`/str/${id}/approve`).then((r) => r.data),
-  reject: (id, reason) => apiClient.post(`/str/${id}/reject`, { reason }).then((r) => r.data),
-  update: (id, content) => apiClient.patch(`/str/${id}`, { draftContent: content }).then((r) => r.data),
+  getAll: (limit = 100) =>
+    apiClient.get(`/str/list?limit=${limit}`).then((r) => r.data),
+  getById: (id) =>
+    apiClient.get(`/str/${id}`).then((r) => r.data),
+  generate: (alertId, reviewerNotes = null) =>
+    apiClient.post('/str/generate', {
+      alert_id: alertId,
+      ...(reviewerNotes ? { reviewer_notes: reviewerNotes } : {}),
+    }).then((r) => r.data),
 }

@@ -18,7 +18,7 @@ import Settings from '@/pages/settings/Settings'
 import NotFound from '@/pages/NotFound'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Landing /> },
+  { path: '/', element: <Navigate to="/dashboard" replace /> },
   {
     element: <AuthLayout />,
     children: [

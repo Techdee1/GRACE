@@ -7,13 +7,11 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
 import { AlertTimeline } from '@/components/alerts/AlertTimeline'
-import { TransactionList } from '@/components/entities/TransactionList'
-import { EntityCard } from '@/components/entities/EntityCard'
 import { useGraphLayout } from '@/components/graph/useGraphLayout'
+import { useGraphData } from '@/hooks/useGraphData'
 import { useAlert } from '@/hooks/useAlerts'
-import { useEntities } from '@/hooks/useEntities'
 import { toast } from '@/store/toastStore'
-import { mockTransactions } from '@/utils/mockData'
+import { strApi } from '@/api/str'
 import { PATTERN_LABELS, formatDateTime, formatNairaShort } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -21,18 +19,32 @@ export default function AlertDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: alert, isLoading } = useAlert(id)
-  const { data: entities } = useEntities()
   const [noteModal, setNoteModal] = useState(false)
   const [dismissModal, setDismissModal] = useState(false)
   const [note, setNote] = useState('')
+  const [strLoading, setStrLoading] = useState(false)
+  const [reviewerNote, setReviewerNote] = useState('')
 
   const entityIds = alert?.entityIds ?? []
-  const { nodes: subNodes, links: subLinks } = useGraphLayout('ALL', entityIds.length ? entityIds : null)
+  const { nodes: rawNodes, links: rawLinks } = useGraphData(entityIds.length ? entityIds : null)
+  const { nodes: subNodes, links: subLinks } = useGraphLayout('ALL', { nodes: rawNodes, links: rawLinks })
 
   if (isLoading) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>
   if (!alert) return <div className="text-center py-16 text-[#4B5563]">Alert not found</div>
 
-  const linkedEntities = entities?.filter((e) => alert.entityIds.includes(e.id)) ?? []
+  const handleGenerateSTR = async () => {
+    setStrLoading(true)
+    try {
+      const draft = await strApi.generate(alert.id, reviewerNote || null)
+      toast.success('STR draft generated')
+      navigate(`/str/${draft.id}`)
+    } catch (err) {
+      toast.error('STR generation failed — check Groq API key')
+      console.error(err)
+    } finally {
+      setStrLoading(false)
+    }
+  }
 
   const handleSaveNote = () => {
     setNoteModal(false)
@@ -46,12 +58,14 @@ export default function AlertDetail() {
     navigate('/alerts')
   }
 
+  const fingerprintHash = alert.subgraphJson?.fingerprint ?? alert.evidenceHash ?? '—'
+
   return (
     <div>
       <PageHeader
         backTo="/alerts"
-        title={`Alert ${alert.id}`}
-        subtitle={`Detected ${formatDateTime(alert.detectedAt)} UTC`}
+        title={`Alert`}
+        subtitle={`${alert.id} · Detected ${formatDateTime(alert.detectedAt)} UTC`}
         actions={
           <div className="flex items-center gap-2">
             <RiskBadge level={alert.riskLevel} />
@@ -63,8 +77,11 @@ export default function AlertDetail() {
       {/* Pattern + Score */}
       <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4 mb-4 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-[#F7F9FC]">{PATTERN_LABELS[alert.patternType]}</p>
-          <p className="text-xs text-[#94A3B8] mt-0.5">{alert.entityCount} entities · {formatNairaShort(alert.totalVolume)} total volume</p>
+          <p className="text-sm font-semibold text-[#F7F9FC]">
+            {PATTERN_LABELS[alert.patternType] ?? alert.patternType}
+          </p>
+          <p className="text-xs text-[#94A3B8] mt-0.5">{alert.reason}</p>
+          <p className="text-xs text-[#4B5563] mt-0.5">{alert.entityIds?.length ?? 0} entities involved</p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold font-mono text-red-400">{(alert.riskScore * 100).toFixed(0)}%</p>
@@ -72,7 +89,7 @@ export default function AlertDetail() {
         </div>
       </div>
 
-      {/* Graph + Entities */}
+      {/* Graph + Entity IDs */}
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <div className="bg-[#111827] border border-[#2D3748] rounded-lg overflow-hidden">
           <div className="px-4 py-2 border-b border-[#2D3748]">
@@ -87,19 +104,21 @@ export default function AlertDetail() {
         </div>
 
         <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">
-          <p className="text-xs text-[#4B5563] uppercase tracking-wider mb-3">Involved Entities</p>
-          <div className="space-y-2 overflow-y-auto max-h-72">
-            {linkedEntities.length ? linkedEntities.map((e) => <EntityCard key={e.id} entity={e} />) : (
-              <p className="text-xs text-[#4B5563]">No entity details available</p>
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider mb-3">Involved Entity IDs</p>
+          <div className="space-y-1.5 overflow-y-auto max-h-72">
+            {entityIds.length > 0 ? entityIds.map((eid) => (
+              <button
+                key={eid}
+                onClick={() => navigate(`/entities/${eid}`)}
+                className="block w-full text-left text-xs font-mono text-[#00D4AA] hover:text-white bg-[#1C2333] hover:bg-[#2D3748] px-3 py-1.5 rounded transition-colors truncate"
+              >
+                {eid}
+              </button>
+            )) : (
+              <p className="text-xs text-[#4B5563]">No entity IDs available</p>
             )}
           </div>
         </div>
-      </div>
-
-      {/* Transactions */}
-      <div className="mb-4">
-        <p className="text-xs text-[#4B5563] uppercase tracking-wider mb-3">Transaction Evidence</p>
-        <TransactionList transactions={mockTransactions} />
       </div>
 
       {/* Timeline */}
@@ -107,17 +126,29 @@ export default function AlertDetail() {
         <AlertTimeline alert={alert} />
       </div>
 
-      {/* Evidence Hash */}
+      {/* Evidence fingerprint */}
       <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-3 mb-4">
-        <p className="text-[10px] text-[#4B5563] uppercase tracking-wider mb-1">Evidence Hash (SHA-256)</p>
-        <p className="text-xs text-[#4B5563] font-mono">{alert.evidenceHash}</p>
+        <p className="text-[10px] text-[#4B5563] uppercase tracking-wider mb-1">Pattern Fingerprint</p>
+        <p className="text-xs text-[#4B5563] font-mono break-all">{fingerprintHash}</p>
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-wrap gap-3">
-        <Button variant="primary" onClick={() => { toast.success('Navigating to STR editor'); navigate('/str/STR-001') }}>
-          Generate STR
+      {/* STR Generation */}
+      <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4 mb-4">
+        <p className="text-xs text-[#4B5563] uppercase tracking-wider mb-3">Generate Suspicious Transaction Report</p>
+        <textarea
+          value={reviewerNote}
+          onChange={(e) => setReviewerNote(e.target.value)}
+          placeholder="Optional reviewer notes for the AI (e.g. focus areas, context)..."
+          rows={2}
+          className="w-full bg-[#1C2333] border border-[#2D3748] rounded-md p-3 text-sm text-[#F7F9FC] placeholder:text-[#4B5563] focus:outline-none focus:border-[#00D4AA]/50 resize-none mb-3"
+        />
+        <Button variant="primary" onClick={handleGenerateSTR} loading={strLoading}>
+          {strLoading ? 'Generating STR…' : 'Generate STR'}
         </Button>
+      </div>
+
+      {/* Other Actions */}
+      <div className="flex flex-wrap gap-3">
         <Button variant="secondary" onClick={() => setNoteModal(true)}>
           Add Note
         </Button>
@@ -143,7 +174,7 @@ export default function AlertDetail() {
       </Modal>
 
       <Modal open={dismissModal} onClose={() => setDismissModal(false)} title="Dismiss Alert">
-        <p className="text-sm text-[#94A3B8] mb-4">Are you sure you want to dismiss alert {alert.id}? This action will be logged in the audit trail.</p>
+        <p className="text-sm text-[#94A3B8] mb-4">Are you sure you want to dismiss this alert? This action will be logged in the audit trail.</p>
         <div className="flex gap-2 justify-end">
           <Button variant="ghost" onClick={() => setDismissModal(false)}>Cancel</Button>
           <Button variant="danger" onClick={handleDismiss}>Confirm Dismiss</Button>
