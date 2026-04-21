@@ -42,3 +42,13 @@ class IngestAcceptedResponse(BaseModel):
     status: str
     total_records: int
     accepted_at: datetime
+
+
+class IngestJobStatusResponse(BaseModel):
+    job_id: UUID
+    status: str
+    total_records: int
+    processed_records: int
+    error_message: str | None
+    created_at: datetime
+    updated_at: datetime

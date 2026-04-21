@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
@@ -29,7 +29,7 @@ class GraphService:
                 entity_type=entity_type,
                 full_name=full_name,
                 address=address,
-                updated_at=datetime.utcnow().isoformat(),
+                updated_at=datetime.now(timezone.utc).isoformat(),
             )
 
     @staticmethod
@@ -65,7 +65,7 @@ class GraphService:
                 currency=currency,
                 occurred_at=occurred_at.isoformat(),
                 channel=channel,
-                updated_at=datetime.utcnow().isoformat(),
+                updated_at=datetime.now(timezone.utc).isoformat(),
             )
 
 

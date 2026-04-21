@@ -9,6 +9,7 @@ from decimal import Decimal
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
+from app.core.redis_client import redis_client
 from app.models import Alert, AlertStatus, Entity, PatternType, Transaction
 from app.models.enums import DecisionStatus
 from app.services.audit_service import write_audit_event
@@ -321,13 +322,15 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
 
 
 def run_heuristic_detection(db: Session) -> dict[str, int]:
-    ctx = _load_context(db)
-    created_pos = _detect_pos_cash_out_ring(db, ctx)
-    created_shell = _detect_shell_director_web(db, ctx)
-    created_layered = _detect_layered_transfer_chain(db, ctx)
-    return {
-        "pos_cash_out_ring": created_pos,
-        "shell_director_web": created_shell,
-        "layered_transfer_chain": created_layered,
-        "total": created_pos + created_shell + created_layered,
-    }
+    lock = redis_client.lock("detection:lock", timeout=60)
+    with lock:
+        ctx = _load_context(db)
+        created_pos = _detect_pos_cash_out_ring(db, ctx)
+        created_shell = _detect_shell_director_web(db, ctx)
+        created_layered = _detect_layered_transfer_chain(db, ctx)
+        return {
+            "pos_cash_out_ring": created_pos,
+            "shell_director_web": created_shell,
+            "layered_transfer_chain": created_layered,
+            "total": created_pos + created_shell + created_layered,
+        }

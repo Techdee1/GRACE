@@ -5,16 +5,47 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import desc, or_, select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.models import Alert, AlertStatus, Entity, Transaction
-from app.schemas.entities import EntityLookupResponse, EntityNeighborResponse, EntityRiskResponse
+from app.schemas.entities import (
+    EntityListItem,
+    EntityListResponse,
+    EntityLookupResponse,
+    EntityNeighborResponse,
+    EntityRiskResponse,
+)
 
 
 router = APIRouter()
+
+
+@router.get("/entities", response_model=EntityListResponse)
+def list_entities(
+    limit: int = Query(default=200, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+) -> EntityListResponse:
+    total = db.scalar(select(func.count()).select_from(Entity)) or 0
+    rows = db.scalars(
+        select(Entity).order_by(desc(Entity.created_at)).limit(limit).offset(offset)
+    ).all()
+    return EntityListResponse(
+        items=[
+            EntityListItem(
+                id=row.id,
+                entity_type=row.entity_type,
+                full_name=row.full_name,
+                address=row.address,
+                created_at=row.created_at,
+            )
+            for row in rows
+        ],
+        total=total,
+    )
 
 
 def _ensure_utc(dt: datetime) -> datetime:

@@ -9,6 +9,11 @@ class STRGenerateRequest(BaseModel):
     reviewer_notes: str | None = None
 
 
+class STRListResponse(BaseModel):
+    strs: list["STRDraftResponse"]
+    total: int
+
+
 class STRDraftResponse(BaseModel):
     id: UUID
     alert_id: UUID

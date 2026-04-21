@@ -10,6 +10,7 @@ from decimal import Decimal
 from sqlalchemy import select
 
 from app.core.database import SessionLocal
+from app.core.init_db import init_db
 from app.core.redis_client import redis_client
 from app.models import Entity, IngestJob, JobStatus, Transaction
 from app.services.detection_service import run_heuristic_detection
@@ -123,6 +124,7 @@ def process_job(job_id: str) -> None:
 
 
 def run_worker_loop() -> None:
+    init_db()
     poll_timeout_seconds = int(os.getenv("INGEST_WORKER_POLL_TIMEOUT", "5"))
     print("[ingest-worker] starting loop")
 

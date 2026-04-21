@@ -28,6 +28,19 @@ class EntityLookupResponse(BaseModel):
     neighbors: list[EntityNeighborResponse]
 
 
+class EntityListItem(BaseModel):
+    id: UUID
+    entity_type: str
+    full_name: str | None
+    address: str | None
+    created_at: datetime
+
+
+class EntityListResponse(BaseModel):
+    items: list[EntityListItem]
+    total: int
+
+
 class EntityRiskResponse(BaseModel):
     entity_id: UUID
     risk_score: Decimal

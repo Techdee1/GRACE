@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -29,6 +30,14 @@ class GroqSTRGenerationService:
         self.provider = "groq"
         self.model_name = settings.groq_model
         self.model_version = "heuristic_v1"
+        self._client: Groq | None = None
+
+    def _get_client(self) -> Groq:
+        if self._client is None:
+            if not settings.groq_api_key:
+                raise STRGenerationError("GROQ_API_KEY is not set")
+            self._client = Groq(api_key=settings.groq_api_key)
+        return self._client
 
     def _build_prompt(self, alert_payload: dict[str, Any], reviewer_notes: str | None) -> str:
         payload_json = json.dumps(alert_payload, ensure_ascii=True, indent=2)
@@ -52,11 +61,7 @@ class GroqSTRGenerationService:
         )
 
     def _normalize_output(self, raw_text: str, alert_payload: dict[str, Any]) -> dict[str, Any]:
-        cleaned = raw_text.strip()
-        if cleaned.startswith("```"):
-            cleaned = cleaned.strip("`")
-            if cleaned.lower().startswith("json"):
-                cleaned = cleaned[4:].strip()
+        cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip(), flags=re.MULTILINE).strip()
 
         try:
             data = json.loads(cleaned)
@@ -106,13 +111,10 @@ class GroqSTRGenerationService:
         alert_payload: dict[str, Any],
         reviewer_notes: str | None = None,
     ) -> STRGenerationResult:
-        if not settings.groq_api_key:
-            raise STRGenerationError("GROQ_API_KEY is not set")
-
         prompt = self._build_prompt(alert_payload, reviewer_notes)
 
         try:
-            client = Groq(api_key=settings.groq_api_key)
+            client = self._get_client()
             completion = client.chat.completions.create(
                 model=self.model_name,
                 messages=[

@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
@@ -18,11 +18,14 @@ def list_alerts(
     status_filter: AlertStatus | None = Query(default=None, alias="status"),
     db: Session = Depends(get_db),
 ) -> AlertsListResponse:
-    query = select(Alert)
+    count_query = select(func.count()).select_from(Alert)
+    list_query = select(Alert)
     if status_filter is not None:
-        query = query.where(Alert.status == status_filter)
+        count_query = count_query.where(Alert.status == status_filter)
+        list_query = list_query.where(Alert.status == status_filter)
 
-    rows = db.scalars(query.order_by(desc(Alert.created_at)).limit(limit)).all()
+    total = db.scalar(count_query) or 0
+    rows = db.scalars(list_query.order_by(desc(Alert.created_at)).limit(limit)).all()
     items = [
         AlertListItemResponse(
             id=row.id,
@@ -36,7 +39,7 @@ def list_alerts(
         )
         for row in rows
     ]
-    return AlertsListResponse(alerts=items, total=len(items))
+    return AlertsListResponse(alerts=items, total=total)
 
 
 @router.get("/alerts/{alert_id}", response_model=AlertDetailResponse)

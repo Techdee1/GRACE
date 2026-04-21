@@ -1,14 +1,46 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
-from app.schemas.str_drafts import STRDraftResponse, STRGenerateRequest
+from app.models import STRDraft
+from app.schemas.str_drafts import STRDraftResponse, STRGenerateRequest, STRListResponse
 from app.services.str_service import STRGenerationError, generate_str_draft, get_str_draft
 
 
 router = APIRouter()
+
+
+@router.get("/str/list", response_model=STRListResponse)
+def list_strs(
+    limit: int = Query(default=100, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+) -> STRListResponse:
+    total = db.scalar(select(func.count()).select_from(STRDraft)) or 0
+    rows = db.scalars(
+        select(STRDraft).order_by(desc(STRDraft.created_at)).limit(limit).offset(offset)
+    ).all()
+    return STRListResponse(
+        strs=[
+            STRDraftResponse(
+                id=r.id,
+                alert_id=r.alert_id,
+                reviewer_notes=r.reviewer_notes,
+                provider=r.provider,
+                model_name=r.model_name,
+                model_version=r.model_version,
+                decision=r.decision.value,
+                content_json=r.content_json,
+                content_text=r.content_text,
+                created_at=r.created_at,
+            )
+            for r in rows
+        ],
+        total=total,
+    )
 
 
 @router.post("/str/generate", response_model=STRDraftResponse, status_code=status.HTTP_201_CREATED)

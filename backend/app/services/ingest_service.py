@@ -46,7 +46,8 @@ def create_ingest_job(
         processed_records=0,
     )
     db.add(job)
-    db.flush()
+    db.commit()
+    db.refresh(job)
 
     redis_key = f"ingest:job:{job.id}:payload"
     redis_payload = {
@@ -56,9 +57,6 @@ def create_ingest_job(
     }
     redis_client.setex(redis_key, REDIS_INGEST_TTL_SECONDS, json.dumps(redis_payload))
     redis_client.rpush(REDIS_INGEST_QUEUE_KEY, str(job.id))
-
-    db.commit()
-    db.refresh(job)
 
     return IngestAcceptedResponse(
         job_id=job.id,
