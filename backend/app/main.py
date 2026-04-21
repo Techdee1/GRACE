@@ -17,7 +17,7 @@ app = FastAPI(title="GRACE Backend", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:4173", "https://grace-428w.vercel.app", "grace-drab.vercel.app"],
+    allow_origins=["http://localhost:5173", "http://localhost:4173", "https://grace-428w.vercel.app", "https://grace-drab.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
