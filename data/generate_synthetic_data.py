@@ -332,7 +332,7 @@ def embed_pos_cashout_ring(rng: random.Random, now: datetime, accounts: list[Ent
     selected = rng.sample(accounts, 13)
     source_accounts = selected[:12]
     beneficiary = selected[12]
-    window_start = now - timedelta(days=12)
+    window_start = now - timedelta(hours=70)
     window_end = window_start + timedelta(hours=60)
     created_tx_ids: list[str] = []
 
