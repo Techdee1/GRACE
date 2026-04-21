@@ -1,8 +1,8 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 import { RequireAuth } from '@/components/layout/RequireAuth'
-import Landing from '@/pages/Landing'
+import LandingPage from '@/pages/LandingPage'
 import Login from '@/pages/auth/Login'
 import ForgotPassword from '@/pages/auth/ForgotPassword'
 import Dashboard from '@/pages/dashboard/Dashboard'
@@ -18,7 +18,7 @@ import Settings from '@/pages/settings/Settings'
 import NotFound from '@/pages/NotFound'
 
 export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/dashboard" replace /> },
+  { path: '/', element: <LandingPage /> },
   {
     element: <AuthLayout />,
     children: [
