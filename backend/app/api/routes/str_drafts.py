@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
 from app.models import STRDraft
-from app.schemas.str_drafts import STRDraftResponse, STRGenerateRequest, STRListResponse
+from app.models.enums import DecisionStatus
+from app.schemas.str_drafts import STRDecisionUpdate, STRDraftResponse, STRGenerateRequest, STRListResponse
+from app.services.audit_service import write_audit_event
 from app.services.str_service import STRGenerationError, generate_str_draft, get_str_draft
 
 
@@ -54,6 +56,32 @@ def generate_str(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except STRGenerationError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+
+
+@router.patch("/str/{str_id}/decision", response_model=STRDraftResponse)
+def update_str_decision(
+    str_id: UUID,
+    body: STRDecisionUpdate,
+    db: Session = Depends(get_db),
+) -> STRDraftResponse:
+    draft = db.scalar(select(STRDraft).where(STRDraft.id == str_id))
+    if draft is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="STR draft not found")
+    if draft.decision != DecisionStatus.pending:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Decision already recorded")
+    draft.decision = DecisionStatus(body.decision)
+    write_audit_event(
+        db=db,
+        action="str_decision_updated",
+        entity_ids=[],
+        alert_id=draft.alert_id,
+        model_version=draft.model_version,
+        decision=DecisionStatus(body.decision),
+        payload_json={"str_id": str(str_id), "decision": body.decision},
+    )
+    db.commit()
+    db.refresh(draft)
+    return get_str_draft(db=db, str_id=str_id)
 
 
 @router.get("/str/{str_id}", response_model=STRDraftResponse)

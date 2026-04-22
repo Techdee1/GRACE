@@ -10,4 +10,6 @@ export const strApi = {
       alert_id: alertId,
       ...(reviewerNotes ? { reviewer_notes: reviewerNotes } : {}),
     }).then((r) => r.data),
+  updateDecision: (id, decision) =>
+    apiClient.patch(`/str/${id}/decision`, { decision }).then((r) => r.data),
 }

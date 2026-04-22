@@ -7,6 +7,35 @@ from app.models import tables  # noqa: F401
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
+        # Remove duplicate alerts — keep the oldest row per fingerprint
+        connection.execute(
+            text(
+                """
+                DELETE FROM alerts
+                WHERE id IN (
+                    SELECT id FROM (
+                        SELECT id,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY subgraph_json->>'fingerprint'
+                                   ORDER BY created_at ASC
+                               ) AS rn
+                        FROM alerts
+                        WHERE subgraph_json->>'fingerprint' IS NOT NULL
+                    ) ranked
+                    WHERE rn > 1
+                );
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS alerts_fingerprint_unique
+                ON alerts ((subgraph_json->>'fingerprint'))
+                WHERE subgraph_json->>'fingerprint' IS NOT NULL;
+                """
+            )
+        )
         connection.execute(
             text(
                 """

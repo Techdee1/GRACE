@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -7,6 +8,10 @@ from pydantic import BaseModel, ConfigDict
 class STRGenerateRequest(BaseModel):
     alert_id: UUID
     reviewer_notes: str | None = None
+
+
+class STRDecisionUpdate(BaseModel):
+    decision: Literal["approved", "rejected"]
 
 
 class STRListResponse(BaseModel):
