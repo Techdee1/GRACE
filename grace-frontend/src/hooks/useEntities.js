@@ -40,6 +40,17 @@ export function useEntity(id) {
   })
 }
 
+export function useEntityTotal() {
+  return useQuery({
+    queryKey: ['entity-total'],
+    queryFn: async () => {
+      const data = await entitiesApi.getAll(1, 0)
+      return data.total ?? 0
+    },
+    staleTime: 60_000,
+  })
+}
+
 export function useEntityRisk(id) {
   return useQuery({
     queryKey: ['entity-risk', id],

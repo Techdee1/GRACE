@@ -20,7 +20,7 @@ function AnimatedNumber({ value }) {
   return <motion.span>{rounded}</motion.span>
 }
 
-export function MetricCard({ label, value, delta, deltaPositive, accent }) {
+export function MetricCard({ label, value, delta, deltaPositive, accent, note }) {
   const borderColor = {
     high:   'border-l-red-500',
     medium: 'border-l-amber-500',
@@ -46,6 +46,9 @@ export function MetricCard({ label, value, delta, deltaPositive, accent }) {
         <p className={cn('text-xs mt-1.5', deltaPositive ? 'text-green-400' : 'text-red-400')}>
           {deltaPositive ? '↑' : '↓'} {delta} vs yesterday
         </p>
+      )}
+      {note && !delta && (
+        <p className="text-xs mt-1.5 text-[#4B5563]">{note}</p>
       )}
     </motion.div>
   )

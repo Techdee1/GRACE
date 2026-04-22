@@ -5,19 +5,29 @@ import { TransactionVolumeChart } from '@/components/charts/TransactionVolumeCha
 import { AlertCard } from '@/components/alerts/AlertCard'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { useAlerts } from '@/hooks/useAlerts'
-import { useEntities } from '@/hooks/useEntities'
+import { useEntityTotal } from '@/hooks/useEntities'
 import { useSTRs } from '@/hooks/useSTR'
 import { Spinner } from '@/components/ui/Spinner'
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const { data: alerts, isLoading: alertsLoading } = useAlerts()
-  const { data: entities } = useEntities()
+  const { data: entityTotal, isLoading: entityLoading } = useEntityTotal()
   const { data: strs } = useSTRs()
 
-  const openAlerts = alerts?.filter((a) => a.status === 'OPEN').length ?? 0
-  const highRiskAlerts = alerts?.filter((a) => a.riskLevel === 'HIGH').length ?? 0
-  const totalAlerts = alerts?.length ?? 0
+  const openAlerts = (alerts ?? []).filter((a) => a.status === 'OPEN').length
+
+  const recentAlerts = (alerts ?? []).filter(
+    (a) => new Date(a.detectedAt) > new Date(Date.now() - 86_400_000)
+  )
+
+  const highRiskIds = new Set(
+    (alerts ?? [])
+      .filter((a) => a.riskScore >= 0.7)
+      .flatMap((a) => a.entityIds ?? [])
+  )
+
+  const approvedStrs = (strs ?? []).filter((s) => s.decision === 'approved').length
 
   return (
     <div>
@@ -36,20 +46,54 @@ export default function Dashboard() {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <MetricCard label="Total Entities" value={entities?.length ?? '—'} delta="12 new" deltaPositive={false} accent="accent" />
-        <MetricCard label="Open Alerts" value={openAlerts} delta="3 new" deltaPositive={false} accent="high" />
-        <MetricCard label="STR Reports" value={strs?.length ?? '—'} delta="1 filed" deltaPositive={true} accent="low" />
-        <MetricCard label="High Risk" value={highRiskAlerts} accent="high" />
+        <MetricCard
+          label="Entities Monitored"
+          value={entityLoading ? '…' : (entityTotal ?? '—')}
+          note="Live"
+          accent="accent"
+        />
+        <MetricCard
+          label="Open Alerts"
+          value={alertsLoading ? '…' : openAlerts}
+          delta={
+            alertsLoading
+              ? undefined
+              : recentAlerts.length > 0
+              ? `${recentAlerts.length} in last 24h`
+              : 'No new alerts today'
+          }
+          deltaPositive={recentAlerts.length === 0}
+          accent="high"
+        />
+        <MetricCard
+          label="High Risk Entities"
+          value={alertsLoading ? '…' : highRiskIds.size}
+          note="Flagged"
+          accent="high"
+        />
+        <MetricCard
+          label="STR Drafts"
+          value={strs == null ? '…' : strs.length}
+          delta={
+            strs == null
+              ? undefined
+              : approvedStrs > 0
+              ? `${approvedStrs} approved`
+              : 'Pending review'
+          }
+          deltaPositive={approvedStrs > 0}
+          accent="low"
+        />
       </div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-4 mb-6">
         <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">
-          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Risk Trend — 7 Days</p>
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Detected Pattern Risk Scores</p>
           <RiskTrendChart />
         </div>
         <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">
-          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Transaction Volume (₦M)</p>
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Alert Pipeline Status</p>
           <TransactionVolumeChart />
         </div>
       </div>
