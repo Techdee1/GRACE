@@ -88,12 +88,12 @@ export default function Dashboard() {
 
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-4 mb-6">
-        <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">
-          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Detected Pattern Risk Scores</p>
+        <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-5 h-[320px]">
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-3">Detected Pattern Risk Scores</p>
           <RiskTrendChart />
         </div>
-        <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">
-          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-4">Alert Pipeline Status</p>
+        <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-5 h-[320px]">
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-3">Alert Pipeline Status</p>
           <TransactionVolumeChart />
         </div>
       </div>

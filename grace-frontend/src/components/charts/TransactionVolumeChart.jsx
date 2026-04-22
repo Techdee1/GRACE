@@ -1,20 +1,12 @@
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAlerts } from '@/hooks/useAlerts'
 import { useSTRs } from '@/hooks/useSTR'
 import { Spinner } from '@/components/ui/Spinner'
 
-const RADIAN = Math.PI / 180
-
-const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value }) => {
-  if (!value) return null
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-  const x = cx + radius * Math.cos(-midAngle * RADIAN)
-  const y = cy + radius * Math.sin(-midAngle * RADIAN)
-  return (
-    <text x={x} y={y} fill="#F7F9FC" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={600}>
-      {value}
-    </text>
-  )
+const STATUS_COLORS = {
+  open: '#ef4444',
+  generated: '#f59e0b',
+  approved: '#22c55e',
 }
 
 const CustomTooltip = ({ active, payload }) => {
@@ -45,46 +37,52 @@ export function TransactionVolumeChart() {
   const total = alerts.length
 
   const data = [
-    { name: 'Open', value: openCount, fill: '#ef4444' },
-    { name: 'STR Generated', value: strCount, fill: '#f59e0b' },
-    { name: 'Approved', value: approvedCount, fill: '#22c55e' },
-  ].filter((d) => d.value > 0)
+    { key: 'open', name: 'Open', value: openCount, fill: STATUS_COLORS.open },
+    { key: 'generated', name: 'STR Generated', value: strCount, fill: STATUS_COLORS.generated },
+    { key: 'approved', name: 'Approved', value: approvedCount, fill: STATUS_COLORS.approved },
+  ]
+  const pieData = data.filter((d) => d.value > 0)
 
   return (
-    <div className="relative" style={{ height: 200 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="42%"
-            cy="50%"
-            innerRadius={52}
-            outerRadius={76}
-            paddingAngle={3}
-            dataKey="value"
-            labelLine={false}
-            label={renderLabel}
-          >
-            {data.map((entry, i) => (
-              <Cell key={i} fill={entry.fill} fillOpacity={0.85} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-          <Legend
-            iconSize={8}
-            iconType="circle"
-            layout="vertical"
-            align="right"
-            verticalAlign="middle"
-            wrapperStyle={{ fontSize: 11, color: '#4B5563', paddingLeft: 12 }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-      {/* Center label */}
-      <div className="absolute pointer-events-none flex flex-col items-center justify-center"
-        style={{ left: '42%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-        <span className="text-2xl font-semibold font-mono text-[#F7F9FC] leading-none">{total}</span>
-        <span className="text-[10px] text-[#4B5563] mt-0.5">total</span>
+    <div className="h-[250px] grid grid-cols-[minmax(0,1fr)_156px] gap-3 items-center">
+      <div className="relative h-full min-h-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={58}
+              outerRadius={84}
+              paddingAngle={4}
+              dataKey="value"
+              stroke="#0B1220"
+              strokeWidth={2}
+            >
+              {pieData.map((entry) => (
+                <Cell key={entry.key} fill={entry.fill} fillOpacity={0.9} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
+          <span className="text-3xl font-semibold font-mono text-[#F7F9FC] leading-none">{total}</span>
+          <span className="text-[11px] text-[#4B5563] mt-1 tracking-wide uppercase">Alerts</span>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {data.map((item) => (
+          <div key={item.key} className="rounded-md border border-[#2D3748] bg-[#1C2333]/45 px-3 py-2.5">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="inline-flex items-center gap-2 text-[#94A3B8]">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill }} />
+                {item.name}
+              </span>
+              <span className="font-mono text-[#F7F9FC]">{item.value}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
