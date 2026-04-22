@@ -17,13 +17,37 @@ export function normaliseEntity(e) {
   }
 }
 
+function extractRiskFields(risk) {
+  const rawScore = parseFloat(risk?.risk_score ?? risk?.riskScore ?? 0)
+  const riskScore = Number.isFinite(rawScore) ? rawScore : 0
+  return {
+    riskScore,
+    riskLevel: deriveRiskLevel(riskScore),
+    linkedAlerts: risk?.contributing_alert_ids ?? risk?.contributingAlertIds ?? [],
+  }
+}
+
 export function useEntities() {
   return useQuery({
     queryKey: ['entities'],
     queryFn: async () => {
       const data = await entitiesApi.getAll()
       const items = data.items ?? data
-      return Array.isArray(items) ? items.map(normaliseEntity) : []
+      if (!Array.isArray(items)) return []
+
+      const rows = items.map(normaliseEntity)
+      const hydratedRows = await Promise.all(
+        rows.map(async (row) => {
+          try {
+            const risk = await entitiesApi.getRisk(row.id)
+            return { ...row, ...extractRiskFields(risk) }
+          } catch {
+            return row
+          }
+        })
+      )
+
+      return hydratedRows
     },
     staleTime: 60_000,
   })
@@ -33,8 +57,13 @@ export function useEntity(id) {
   return useQuery({
     queryKey: ['entity', id],
     queryFn: async () => {
-      const data = await entitiesApi.getById(id)
-      return normaliseEntity(data)
+      const [data, risk] = await Promise.all([
+        entitiesApi.getById(id),
+        entitiesApi.getRisk(id).catch(() => null),
+      ])
+      const entity = normaliseEntity(data)
+      if (!risk) return entity
+      return { ...entity, ...extractRiskFields(risk) }
     },
     enabled: !!id,
   })

@@ -7,6 +7,7 @@ import { useEntity } from '@/hooks/useEntities'
 import { useAlerts } from '@/hooks/useAlerts'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatNairaShort } from '@/utils/formatters'
+import { deriveRiskLevel } from '@/utils/risk'
 
 export default function EntityDetail() {
   const { id } = useParams()
@@ -21,6 +22,17 @@ export default function EntityDetail() {
     a.entityIds?.includes(id) || a.entityIds?.includes(entity.id)
   ) ?? []
 
+  const riskScoreByEntityId = new Map()
+  ;(alerts ?? []).forEach((alert) => {
+    const score = Number.isFinite(alert.riskScore) ? alert.riskScore : 0
+    ;(alert.entityIds ?? []).forEach((entityId) => {
+      const current = riskScoreByEntityId.get(entityId) ?? 0
+      if (score > current) {
+        riskScoreByEntityId.set(entityId, score)
+      }
+    })
+  })
+
   // Build 1-hop graph from entity's neighbors (from backend response)
   const neighbors = entity.neighbors ?? []
   const hopNodes = [
@@ -29,7 +41,7 @@ export default function EntityDetail() {
       id: n.entity_id ?? n.entityId,
       label: n.full_name ?? n.canonicalName ?? n.entity_id,
       type: (n.entity_type ?? n.entityType ?? '').toUpperCase(),
-      risk: 'LOW',
+      risk: deriveRiskLevel(riskScoreByEntityId.get(n.entity_id ?? n.entityId) ?? 0),
     })),
   ]
   const hopLinks = neighbors.map((n) => ({
