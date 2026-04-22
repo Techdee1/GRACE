@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { STREditor } from '@/components/str/STREditor'
 import { STRPreview } from '@/components/str/STRPreview'
@@ -8,24 +8,49 @@ import { AuditTrail } from '@/components/str/AuditTrail'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { useSTR } from '@/hooks/useSTR'
+import { useAlert } from '@/hooks/useAlerts'
+import { entitiesApi } from '@/api/entities'
 import { strApi } from '@/api/str'
+import { generateSTRPdf } from '@/utils/generateSTRPdf'
 import { toast } from '@/store/toastStore'
 import { Spinner } from '@/components/ui/Spinner'
+import { Download } from 'lucide-react'
 
 export default function STRDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: str, isLoading } = useSTR(id)
+  const { data: alert } = useAlert(str?.alertId)
   const [approveModal, setApproveModal] = useState(false)
   const [rejectModal, setRejectModal] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [decisionLoading, setDecisionLoading] = useState(false)
 
+  const entityIds = alert?.entityIds ?? []
+  const entityQueries = useQueries({
+    queries: entityIds.map((entityId) => ({
+      queryKey: ['entity-pdf', entityId],
+      queryFn: () => entitiesApi.getById(entityId),
+      staleTime: 60_000,
+      enabled: Boolean(entityId),
+    })),
+  })
+  const entities = entityQueries.map((query) => query.data).filter(Boolean)
+
   if (isLoading) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>
   if (!str) return <div className="text-center py-16 text-[#4B5563]">STR not found</div>
 
   const isPending = str.decision === 'pending'
+
+  const handleDownloadPDF = () => {
+    try {
+      const filename = generateSTRPdf({ str, alert, entities })
+      toast.success(`Downloaded ${filename}`)
+    } catch {
+      toast.error('Failed to generate PDF — please try again')
+    }
+  }
 
   const handleApprove = async () => {
     setDecisionLoading(true)
@@ -72,6 +97,10 @@ export default function STRDetail() {
 
       {isPending ? (
         <div className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={handleDownloadPDF} disabled={decisionLoading}>
+            <Download size={16} />
+            Download PDF
+          </Button>
           <Button variant="primary" onClick={() => setApproveModal(true)} disabled={decisionLoading}>Approve & File</Button>
           <Button variant="secondary" onClick={() => toast.info('Changes requested — awaiting revision')} disabled={decisionLoading}>Request Changes</Button>
           <Button variant="danger" onClick={() => setRejectModal(true)} disabled={decisionLoading}>Reject</Button>
@@ -79,11 +108,19 @@ export default function STRDetail() {
       ) : str.decision === 'approved' ? (
         <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
           <span className="text-green-400 text-sm font-medium">✓ STR filed successfully with NFIU</span>
+          <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+            <Download size={14} />
+            Download PDF
+          </Button>
           <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">Back to STRs →</button>
         </div>
       ) : (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
           <span className="text-red-400 text-sm font-medium">✗ STR rejected</span>
+          <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+            <Download size={14} />
+            Download PDF
+          </Button>
           <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">Back to STRs →</button>
         </div>
       )}
