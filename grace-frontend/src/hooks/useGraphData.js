@@ -2,6 +2,7 @@ import { useQueries } from '@tanstack/react-query'
 import { useAlerts } from '@/hooks/useAlerts'
 import { entitiesApi } from '@/api/entities'
 import { normaliseEntity } from '@/hooks/useEntities'
+import { deriveRiskLevel } from '@/utils/risk'
 
 export function useGraphData(filterEntityIds = null) {
   const { data: alerts = [] } = useAlerts()
@@ -20,10 +21,38 @@ export function useGraphData(filterEntityIds = null) {
     })),
   })
 
-  const entities = entityQueries.flatMap((q) => (q.data ? [q.data] : []))
-  const entitySet = new Set(entities.map((e) => e.id))
+  const riskQueries = useQueries({
+    queries: targetIds.map((id) => ({
+      queryKey: ['entity-risk', id],
+      queryFn: () => entitiesApi.getRisk(id),
+      staleTime: 30_000,
+      enabled: !!id,
+    })),
+  })
 
-  const nodes = entities.map((e) => ({
+  const entities = entityQueries.flatMap((q) => (q.data ? [q.data] : []))
+  const riskById = new Map(
+    riskQueries
+      .map((q) => q.data)
+      .filter(Boolean)
+      .map((risk) => [risk.entity_id ?? risk.entityId, parseFloat(risk.risk_score ?? risk.riskScore ?? 0)])
+  )
+
+  const entitiesWithRisk = entities.map((entity) => {
+    const rawRiskScore = riskById.has(entity.id)
+      ? riskById.get(entity.id)
+      : parseFloat(entity.riskScore ?? 0)
+    const riskScore = Number.isFinite(rawRiskScore) ? rawRiskScore : 0
+
+    return {
+      ...entity,
+      riskScore,
+      riskLevel: deriveRiskLevel(riskScore),
+    }
+  })
+  const entitySet = new Set(entitiesWithRisk.map((e) => e.id))
+
+  const nodes = entitiesWithRisk.map((e) => ({
     id: e.id,
     label: e.canonicalName,
     type: e.entityType,
@@ -32,7 +61,7 @@ export function useGraphData(filterEntityIds = null) {
 
   const linkSet = new Set()
   const links = []
-  entities.forEach((e) => {
+  entitiesWithRisk.forEach((e) => {
     ;(e.neighbors ?? []).forEach((n) => {
       const neighborId = n.entity_id ?? n.entityId
       if (!entitySet.has(neighborId)) return
@@ -47,7 +76,7 @@ export function useGraphData(filterEntityIds = null) {
     })
   })
 
-  const isLoading = entityQueries.some((q) => q.isLoading)
+  const isLoading = entityQueries.some((q) => q.isLoading) || riskQueries.some((q) => q.isLoading)
 
   return { nodes, links, isLoading }
 }
