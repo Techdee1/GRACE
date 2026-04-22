@@ -20,12 +20,12 @@ function SidebarContent({ onClose }) {
   return (
     <aside className="w-56 h-full bg-[#111827] border-r border-[#2D3748] flex flex-col">
       <div className="h-16 flex items-center px-5 border-b border-[#2D3748] justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight text-[#F7F9FC]">
+        <NavLink to="/" onClick={onClose} className="flex items-center gap-2 group">
+          <span className="text-lg font-bold tracking-tight text-[#F7F9FC] group-hover:text-white transition-colors">
             GR<span className="text-[#00D4AA]">ACE</span>
           </span>
-          <span className="text-[10px] text-[#4B5563] font-mono">v1.0</span>
-        </div>
+          <span className="text-[10px] text-[#4B5563] font-mono group-hover:text-[#94A3B8] transition-colors">v1.0</span>
+        </NavLink>
         {onClose && (
           <button onClick={onClose} className="p-1 rounded text-[#4B5563] hover:text-[#F7F9FC] lg:hidden">
             <XMarkIcon className="w-4 h-4" />
