@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
-    "test:parse": "tsx tests/parseTransactionsTool.test.ts"
+    "test:parse": "tsx tests/parseTransactionsTool.test.ts",
+    "test:graph": "tsx tests/buildEntityGraphTool.test.ts"
   },
   "keywords": [],
   "author": "",

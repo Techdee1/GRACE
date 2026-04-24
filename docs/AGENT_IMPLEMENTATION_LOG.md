@@ -101,3 +101,41 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 03 is complete and ready for focused commit.
+
+---
+
+## Task 04 — BuildEntityGraph Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `BuildEntityGraphTool` in `agent/src/tools/BuildEntityGraphTool.ts`.
+- Added graph construction over normalized transactions:
+  - adjacency map per entity
+  - directed edge aggregation with tx count, amount sum, first/last timestamps, and channels
+  - node metrics including in-degree, out-degree, tx count, flow totals, and unique counterparties
+- Added hub detection:
+  - high outbound hubs by out-degree and total outbound volume
+  - high inbound hubs by in-degree and total inbound volume
+- Added shared-identifier cluster detection using masked identifiers (`***last4`) with configurable minimum cluster size.
+- Added deterministic sorting for nodes, edges, adjacency, and cluster outputs for stable tests/demo reproducibility.
+- Added focused tool test in `agent/tests/buildEntityGraphTool.test.ts`.
+- Added npm script `test:graph` in `agent/package.json`.
+
+### Issues Encountered
+- No blocking implementation issues after Task 03 TypeScript/module fixes.
+
+### Fixes Applied
+- Reused strict import extension pattern (`.js`) and shared tool envelope conventions established in prior tasks.
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 04 is complete and ready for focused commit.
