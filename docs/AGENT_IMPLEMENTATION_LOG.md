@@ -139,3 +139,46 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 04 is complete and ready for focused commit.
+
+---
+
+## Task 05 — DetectPatterns Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `DetectPatternsTool` in `agent/src/tools/DetectPatternsTool.ts`.
+- Added heuristic prefilter detection (no LLM reasoning) with configurable sensitivity profiles (`low`, `medium`, `high`).
+- Implemented deterministic candidate generation with evidence snippets and metrics for:
+  - `shared_identifier_cluster`
+  - `structuring_near_threshold`
+  - `rapid_in_out_flow`
+  - `hub_conduit_activity`
+- Added sensitivity-aware thresholds for:
+  - shared identifier cluster size
+  - near-threshold structuring transaction count
+  - rapid-flow time window and outflow ratio
+  - hub in/out degree criteria
+- Added deterministic sorting and candidate cap (`max_candidates`) for repeatable demo output.
+- Added focused tool test in `agent/tests/detectPatternsTool.test.ts`.
+- Added npm script `test:patterns` in `agent/package.json`.
+
+### Issues Encountered
+- No blocking implementation issues.
+
+### Fixes Applied
+- Reused existing strict TypeScript and tool-envelope conventions from prior tasks to keep output contract consistent.
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 05 is complete and ready for focused commit.
