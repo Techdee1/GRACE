@@ -1,6 +1,14 @@
 import { z } from 'zod'
 
-export class PingTool {
+interface LuaTool {
+  name: string
+  description: string
+  inputSchema: unknown
+  execute: (input: unknown) => Promise<unknown>
+  condition?: () => Promise<boolean>
+}
+
+export class PingTool implements LuaTool {
   name = 'ping_tool'
 
   description = 'Health-check tool that echoes a short payload.'
@@ -9,7 +17,7 @@ export class PingTool {
     text: z.string().default('ok'),
   })
 
-  async execute(input: z.input<typeof this.inputSchema>) {
+  async execute(input: unknown) {
     const parsed = this.inputSchema.parse(input)
     return {
       ok: true,

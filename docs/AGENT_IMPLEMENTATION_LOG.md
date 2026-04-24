@@ -486,3 +486,50 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 11 is complete and ready for focused commit.
+
+---
+
+## Task 12 — Lua Tool Discovery Fix, Regression Gate, and Production Deploy
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Fixed Lua compiler tool discovery by aligning skill-level tools to compiler-detectable LuaTool class patterns:
+  - `agent/src/skills/transactionAnalysisSkill.ts`
+  - `agent/src/skills/reportingSkill.ts`
+  - `agent/src/skills/tools/PingTool.ts`
+- Added deterministic CLI regression fixtures:
+  - `agent/tests/fixtures/analysis-negative.csv`
+  - `agent/tests/fixtures/analysis-positive.csv`
+- Added deployment-safe regression scripts in `agent/package.json`:
+  - `lua:compile`
+  - `lua:test:analysis:negative`
+  - `lua:test:analysis:positive`
+  - `lua:regression`
+- Completed non-interactive release flow:
+  - `npx lua push all --force --ci`
+  - `npx lua deploy all --force --ci`
+
+### Deployment Outcome
+- Deployed primitives:
+  - `transaction-analysis` v1.0.3
+  - `reporting` v1.0.1
+  - `ping-skill` v1.0.2
+  - Persona v1
+
+### Test Evidence
+- Command: `npm run lua:regression`
+- Result: PASS
+  - build: PASS
+  - typecheck: PASS
+  - lua compile: PASS
+  - negative fixture: `NO_CANDIDATES`
+  - positive fixture: `ANALYZED` with 3 candidates
+- Command: `npm run test:skill-reporting`
+- Result: PASS
+  - confirms explicit intent gating
+  - confirms STR draft remains `PENDING_REVIEW`
+
+### Notes
+- Root cause of original Lua CLI failure (`No tools found in compiled output`) is resolved.
+- End-to-end local pre-deploy and post-deploy smoke checks are green.

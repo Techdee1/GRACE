@@ -9,6 +9,14 @@ import { ScoreAndExplainRiskTool } from '../tools/ScoreAndExplainRiskTool.js'
 
 import type { TransactionAnalysisResult } from '../types/analysis.js'
 
+interface LuaTool {
+  name: string
+  description: string
+  inputSchema: unknown
+  execute: (input: unknown) => Promise<unknown>
+  condition?: () => Promise<boolean>
+}
+
 type RunTransactionAnalysisInput = {
   data: string
   format?: 'csv' | 'json'
@@ -230,17 +238,20 @@ export async function runTransactionAnalysis(
   }
 }
 
-const analyzeTransactionsTool = {
-  name: 'analyze_transactions',
-  description:
-    'Run full AML pipeline (parse -> graph -> detect -> reason -> risk) and return structured analysis output.',
-  inputSchema: z.object({
+class AnalyzeTransactionsTool implements LuaTool {
+  name = 'analyze_transactions'
+
+  description =
+    'Run full AML pipeline (parse -> graph -> detect -> reason -> risk) and return structured analysis output.'
+
+  inputSchema = z.object({
     data: z.string().min(1),
     format: z.enum(['csv', 'json']).default('csv'),
     sensitivity: z.enum(['low', 'medium', 'high']).default('medium'),
     reason_mode: z.enum(['deterministic', 'live']).default('deterministic'),
-  }),
-  execute: async (input: unknown) => {
+  })
+
+  async execute(input: unknown) {
     const parsed = z
       .object({
         data: z.string().min(1),
@@ -250,7 +261,7 @@ const analyzeTransactionsTool = {
       })
       .parse(input)
     return runTransactionAnalysis(parsed)
-  },
+  }
 }
 
 export const transactionAnalysisSkill = new LuaSkill({
@@ -258,5 +269,5 @@ export const transactionAnalysisSkill = new LuaSkill({
   description: 'AML transaction analysis for suspicious pattern detection and risk scoring.',
   context:
     'Use analyze_transactions as the primary entrypoint to enforce sequencing: parse -> graph -> detect -> reason -> risk. Use individual tools only for focused debug or analyst drill-down.',
-  tools: [analyzeTransactionsTool as any],
+  tools: [new AnalyzeTransactionsTool()],
 })
