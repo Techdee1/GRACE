@@ -29,6 +29,20 @@ async function run() {
     assert.equal(noIntent.reason, 'INTENT_REQUIRED', 'Expected intent-required failure reason')
   }
 
+  const missingAnalysis = await runReportingSkill({
+    analysis: undefined as any,
+    generate_report: true,
+  } as any)
+
+  assert.equal(missingAnalysis.ok, false, 'Missing analysis should not crash reporting skill')
+  if (!missingAnalysis.ok) {
+    assert.equal(
+      missingAnalysis.reason,
+      'ANALYSIS_NOT_READY',
+      'Expected ANALYSIS_NOT_READY for missing analysis payload'
+    )
+  }
+
   const withIntent = await runReportingSkill({
     analysis,
     generate_report: true,
@@ -42,6 +56,25 @@ async function run() {
     assert.ok(
       withIntent.str_draft.compliance_notice.includes('not been filed'),
       'Compliance notice should state non-filed status'
+    )
+  }
+
+  const withRawData = await runReportingSkill({
+    generate_report: true,
+    data: csvData,
+    format: 'csv',
+    sensitivity: 'medium',
+    reason_mode: 'deterministic',
+    case_reference: 'CASE-REPORT-002',
+    reporting_period: '2026-04-24',
+  })
+
+  assert.equal(withRawData.ok, true, 'Reporting should also succeed when only raw data is provided')
+  if (withRawData.ok) {
+    assert.equal(
+      withRawData.str_draft.status,
+      'PENDING_REVIEW',
+      'Raw data path should also produce PENDING_REVIEW draft'
     )
   }
 

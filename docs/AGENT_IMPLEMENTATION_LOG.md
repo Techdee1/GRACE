@@ -533,3 +533,37 @@ Status: Completed
 ### Notes
 - Root cause of original Lua CLI failure (`No tools found in compiled output`) is resolved.
 - End-to-end local pre-deploy and post-deploy smoke checks are green.
+
+---
+
+## Task 13 — Production Reporting Flow Hotfix (v1.0.3)
+Date: 2026-04-24
+Status: Completed
+
+### Issue
+- Production live chat intermittently failed on reporting step with:
+  - `Cannot read properties of undefined (reading 'status')`
+- Root trigger: LLM/tool call handoff did not always pass a complete `analysis` object into `generate_str_report`.
+
+### Work Completed
+- Hardened reporting skill input handling in `agent/src/skills/reportingSkill.ts`:
+  - `analysis` made optional.
+  - Added safe fallback path to run analysis internally when raw data is provided.
+  - Added defensive guards and explicit `ANALYSIS_NOT_READY` responses for incomplete payloads.
+  - Updated skill context to guide use of either analysis output or raw transaction data.
+- Added regression coverage in `agent/tests/reportingSkill.test.ts` for raw-data report generation path.
+
+### Test Evidence
+- Command: `npm run build && npm run typecheck && npm run test:skill-reporting`
+- Result: PASS
+- Deploy commands:
+  - `npx lua push skill --name reporting --force --ci`
+  - `npx lua deploy skill --name reporting --force --ci`
+- Result: PASS (reporting skill deployed as `v1.0.3`)
+- Production live smoke (threaded):
+  - Analysis step: PASS (`ANALYZED`)
+  - Report step: PASS (`STR-2026-04-24-28BB6D33`, `PENDING_REVIEW`)
+
+### Notes
+- Previous production crash path is eliminated for normal two-step threaded usage.
+- Raw CSV prompts still require correctly formatted multiline payloads to avoid parsing failures.
