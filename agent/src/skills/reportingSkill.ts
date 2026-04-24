@@ -1,3 +1,6 @@
+import { LuaSkill } from 'lua-cli'
+import { z } from 'zod'
+
 import { GenerateSTRTool } from '../tools/GenerateSTRTool.js'
 
 import type { TransactionAnalysisResult } from '../types/analysis.js'
@@ -85,8 +88,33 @@ export async function runReportingSkill(input: ReportingSkillInput): Promise<Rep
   }
 }
 
-export const reportingSkill = {
-  name: 'reporting',
-  description: 'Generates PENDING_REVIEW STR drafts when explicit user intent is provided.',
-  run: runReportingSkill,
+const generateSTRReportTool = {
+  name: 'generate_str_report',
+  description:
+    'Generate a PENDING_REVIEW STR draft from analyzed outputs. Requires explicit user intent.',
+  inputSchema: z.object({
+    analysis: z.any(),
+    generate_report: z.boolean().default(true),
+    case_reference: z.string().optional(),
+    reporting_period: z.string().optional(),
+  }),
+  execute: async (input: unknown) => {
+    const parsed = z
+      .object({
+        analysis: z.any(),
+        generate_report: z.boolean().default(true),
+        case_reference: z.string().optional(),
+        reporting_period: z.string().optional(),
+      })
+      .parse(input)
+    return runReportingSkill(parsed as ReportingSkillInput)
+  },
 }
+
+export const reportingSkill = new LuaSkill({
+  name: 'reporting',
+  description: 'Generate NFIU-oriented STR drafts that are always PENDING_REVIEW.',
+  context:
+    'Use generate_str_report only when explicit user intent to generate a report is present and analysis status is ANALYZED with reasoning and risk outputs.',
+  tools: [generateSTRReportTool as any],
+})

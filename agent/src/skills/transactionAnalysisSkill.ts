@@ -1,3 +1,6 @@
+import { LuaSkill } from 'lua-cli'
+import { z } from 'zod'
+
 import { BuildEntityGraphTool } from '../tools/BuildEntityGraphTool.js'
 import { DetectPatternsTool } from '../tools/DetectPatternsTool.js'
 import { ParseTransactionsTool } from '../tools/ParseTransactionsTool.js'
@@ -227,8 +230,33 @@ export async function runTransactionAnalysis(
   }
 }
 
-export const transactionAnalysisSkill = {
-  name: 'transaction-analysis',
-  description: 'Runs deterministic AML analysis chain: parse -> graph -> detect -> reason -> risk.',
-  run: runTransactionAnalysis,
+const analyzeTransactionsTool = {
+  name: 'analyze_transactions',
+  description:
+    'Run full AML pipeline (parse -> graph -> detect -> reason -> risk) and return structured analysis output.',
+  inputSchema: z.object({
+    data: z.string().min(1),
+    format: z.enum(['csv', 'json']).default('csv'),
+    sensitivity: z.enum(['low', 'medium', 'high']).default('medium'),
+    reason_mode: z.enum(['deterministic', 'live']).default('deterministic'),
+  }),
+  execute: async (input: unknown) => {
+    const parsed = z
+      .object({
+        data: z.string().min(1),
+        format: z.enum(['csv', 'json']).default('csv'),
+        sensitivity: z.enum(['low', 'medium', 'high']).default('medium'),
+        reason_mode: z.enum(['deterministic', 'live']).default('deterministic'),
+      })
+      .parse(input)
+    return runTransactionAnalysis(parsed)
+  },
 }
+
+export const transactionAnalysisSkill = new LuaSkill({
+  name: 'transaction-analysis',
+  description: 'AML transaction analysis for suspicious pattern detection and risk scoring.',
+  context:
+    'Use analyze_transactions as the primary entrypoint to enforce sequencing: parse -> graph -> detect -> reason -> risk. Use individual tools only for focused debug or analyst drill-down.',
+  tools: [analyzeTransactionsTool as any],
+})

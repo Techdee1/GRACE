@@ -1,0 +1,18 @@
+agent:
+  agentId: baseAgent_agent_1776995296296_hwf4neyjk
+  orgId: ac1654e2-32ee-492d-afd7-1fa2cedcd30a
+skills:
+  - name: transaction-analysis
+    skillId: e5c07fb0-2728-46c0-9891-6a9bd70c824d
+    version: 1.0.2
+  - name: reporting
+    skillId: 9319731e-008c-44f1-bd5d-63a67787c1e4
+    version: 1.0.0
+  - name: ping-skill
+    skillId: f9a6db78-9425-4ee8-8470-6f98d2175d1d
+    version: 1.0.1
+webhooks: []
+jobs: []
+preprocessors: []
+postprocessors: []
+mcpServers: []
