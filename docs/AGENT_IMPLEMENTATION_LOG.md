@@ -233,3 +233,48 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 06 is complete and ready for focused commit.
+
+---
+
+## Task 07 — ScoreAndExplainRisk Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `ScoreAndExplainRiskTool` in `agent/src/tools/ScoreAndExplainRiskTool.ts`.
+- Added direct risk scoring from reasoning outputs using:
+  - recommendation-weighted base scoring
+  - confidence scaling
+  - red-flag boost
+- Added one-hop risk propagation over adjacency with configurable decay (`decay_factor`).
+- Added source attribution per entity risk:
+  - `direct`
+  - `indirect`
+  - `direct_and_indirect`
+- Added explainable risk outputs with supporting candidates and summary counts.
+- Added focused test in `agent/tests/scoreAndExplainRiskTool.test.ts`.
+- Added npm script `test:risk` in `agent/package.json`.
+
+### Issues Encountered
+- Initial score calibration placed a high-confidence `ESCALATE` fixture at `MEDIUM` risk in tests.
+
+### Fixes Applied
+- Tuned recommendation base weights so high-confidence escalation cases map correctly to `HIGH` risk while preserving propagation behavior.
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:risk`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS (regression)
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 07 is complete and ready for focused commit.
