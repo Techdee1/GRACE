@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test:parse": "tsx tests/parseTransactionsTool.test.ts",
     "test:graph": "tsx tests/buildEntityGraphTool.test.ts",
-    "test:patterns": "tsx tests/detectPatternsTool.test.ts"
+    "test:patterns": "tsx tests/detectPatternsTool.test.ts",
+    "test:reason": "tsx tests/reasonAboutClusterTool.test.ts"
   },
   "keywords": [],
   "author": "",

@@ -182,3 +182,54 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 05 is complete and ready for focused commit.
+
+---
+
+## Task 06 — ReasonAboutCluster Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `ReasonAboutClusterTool` in `agent/src/tools/ReasonAboutClusterTool.ts`.
+- Added strict reasoning output contract with schema-validated fields:
+  - `assessment`
+  - `confidence`
+  - `red_flags`
+  - `alternatives_considered`
+  - `recommendation`
+  - `rationale_summary`
+- Implemented execution modes:
+  - `deterministic` (default, test-safe)
+  - `live` (OpenAI primary path, Groq fallback path)
+- Added parser recovery logic for model responses:
+  - direct JSON parse
+  - fenced JSON block extraction
+  - first-object slicing recovery
+- Added graceful degradation policy:
+  - if primary/fallback model fails or returns invalid JSON, degrade to deterministic reasoning output.
+- Added focused tool test in `agent/tests/reasonAboutClusterTool.test.ts`.
+- Added npm script `test:reason` in `agent/package.json`.
+
+### Issues Encountered
+- Initial TypeScript failures from Zod v4 signature requirements and defaulted-input typing.
+
+### Fixes Applied
+- Updated record schema usage to explicit key/value signature for Zod v4.
+- Updated execute input type to `z.input<typeof inputSchema>` so defaultable fields are optional at call sites.
+- Refactored context handling to optional schema with internal defaults for prompt construction.
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 06 is complete and ready for focused commit.
