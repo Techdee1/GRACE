@@ -56,3 +56,48 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Ready to start Task 03 (ParseTransactionsTool) once continuing on this branch.
+
+---
+
+## Task 03 — ParseTransactions Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `ParseTransactionsTool` in `agent/src/tools/ParseTransactionsTool.ts`.
+- Added shared tool result envelope type in `agent/src/types/tooling.ts`.
+- Added parsing support for both CSV and JSON transaction payloads.
+- Added field normalization for common source formats:
+  - id/reference mapping (`id`, `reference`, `tx_id`, `transaction_id`)
+  - sender/receiver id mapping from multiple input key variants
+  - amount parsing from numeric and string fields
+  - timestamp normalization to ISO-8601
+  - channel normalization with controlled enum and `unknown` fallback
+- Added privacy guard for BVN-like identifiers by masking to `***last4`.
+- Added per-row validation and skip handling with summarized skip reasons.
+- Added output summary metrics:
+  - parsed/skipped counts
+  - unique sender/receiver counts
+  - total volume
+  - date range (earliest/latest)
+
+### Issues Encountered
+- TypeScript `rootDir` excluded test files, causing typecheck failure.
+- Node16 module resolution required explicit `.js` extensions in TS import paths.
+- `LuaTool` interface typing from `lua-cli` conflicted with local `zod` type identity.
+
+### Fixes Applied
+- Updated `agent/tsconfig.json` `rootDir` from `src` to `.`.
+- Added explicit `.js` import extensions for local module imports.
+- Removed direct `implements LuaTool` constraint to avoid cross-package Zod type conflict while preserving Lua-compatible tool shape.
+- Tightened test null checks for strict TypeScript settings.
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 03 is complete and ready for focused commit.
