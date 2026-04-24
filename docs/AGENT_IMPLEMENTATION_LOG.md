@@ -425,3 +425,64 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 10 is complete and ready for focused commit.
+
+---
+
+## Task 11 — Skills and Agent Wiring
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Added shared analysis types in `agent/src/types/analysis.ts`.
+- Implemented transaction analysis skill orchestration in `agent/src/skills/transactionAnalysisSkill.ts`.
+  - Enforces sequence: parse -> graph -> detect -> reason -> risk
+  - Returns deterministic status states: `ANALYZED`, `NO_CANDIDATES`, `FAILED`
+- Implemented reporting skill in `agent/src/skills/reportingSkill.ts`.
+  - Requires explicit intent (`generate_report`) before STR drafting
+  - Requires analysis state `ANALYZED` with required reasoning/risk outputs
+  - Produces PENDING_REVIEW STR draft summary via `GenerateSTRTool`
+- Updated `agent/src/index.ts` with agent export wiring:
+  - skills: transaction-analysis, reporting
+  - jobs: daily transaction scan
+  - postprocessors: NFIU disclaimer appender
+  - explicit compliance-safe persona constraints
+- Added skill tests:
+  - `agent/tests/transactionAnalysisSkill.test.ts`
+  - `agent/tests/reportingSkill.test.ts`
+- Added npm scripts:
+  - `test:skill-analysis`
+  - `test:skill-reporting`
+
+### Issues Encountered
+- No blocking implementation issues.
+
+### Fixes Applied
+- N/A
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:skill-analysis`
+- Result: PASS
+- Command: `npm run test:skill-reporting`
+- Result: PASS
+- Command: `npm run test:post`
+- Result: PASS (regression)
+- Command: `npm run test:daily`
+- Result: PASS (regression)
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS (regression)
+- Command: `npm run test:risk`
+- Result: PASS (regression)
+- Command: `npm run test:str`
+- Result: PASS (regression)
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 11 is complete and ready for focused commit.
