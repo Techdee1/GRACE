@@ -278,3 +278,50 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 07 is complete and ready for focused commit.
+
+---
+
+## Task 08 — GenerateSTR Tool
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented `GenerateSTRTool` in `agent/src/tools/GenerateSTRTool.ts`.
+- Added structured STR draft generation with:
+  - unique STR id
+  - explicit `PENDING_REVIEW` status
+  - jurisdiction, case/reporting metadata
+  - executive summary
+  - suspicion basis list
+  - entities of interest with risk context
+  - multi-section narrative (`background`, `transaction_activity`, `analytical_findings`, `recommendation`)
+  - evidence references derived from candidate and entity artifacts
+  - compliance notice explicitly stating non-filed draft status
+- Added focused test in `agent/tests/generateSTRTool.test.ts`.
+- Added npm script `test:str` in `agent/package.json`.
+
+### Issues Encountered
+- No blocking implementation issues.
+
+### Fixes Applied
+- N/A
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS (regression)
+- Command: `npm run test:risk`
+- Result: PASS (regression)
+- Command: `npm run test:str`
+- Result: PASS
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 08 is complete and ready for focused commit.
