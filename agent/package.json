@@ -11,7 +11,8 @@
     "test:patterns": "tsx tests/detectPatternsTool.test.ts",
     "test:reason": "tsx tests/reasonAboutClusterTool.test.ts",
     "test:risk": "tsx tests/scoreAndExplainRiskTool.test.ts",
-    "test:str": "tsx tests/generateSTRTool.test.ts"
+    "test:str": "tsx tests/generateSTRTool.test.ts",
+    "test:daily": "tsx tests/dailyTransactionScanJob.test.ts"
   },
   "keywords": [],
   "author": "",

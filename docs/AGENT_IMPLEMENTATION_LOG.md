@@ -325,3 +325,58 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 08 is complete and ready for focused commit.
+
+---
+
+## Task 09 — Daily Automated Scan Job
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented real daily analysis flow in `agent/src/jobs/dailyTransactionScan.ts`.
+- Added orchestration chain: parse -> graph -> detect -> reason -> risk -> STR.
+- Added structured run artifact output with:
+  - `run_id`, `executed_at`, status
+  - input summary
+  - detection summary
+  - risk summary
+  - STR summary (including `PENDING_REVIEW` status)
+  - explicit error field
+- Added deterministic handling for no-candidate and failure outcomes:
+  - `NO_CANDIDATES` with structured counts
+  - `FAILED` with error details
+- Added Lua job export `dailyTransactionScanJob` with Africa/Lagos cron schedule (`0 7 * * *`).
+- Added input sourcing support from:
+  - direct input payload
+  - `DAILY_SCAN_DATA` environment variable
+  - `DAILY_SCAN_DATA_PATH` file input in job execute path
+- Added focused test in `agent/tests/dailyTransactionScanJob.test.ts`.
+- Added npm script `test:daily` in `agent/package.json`.
+
+### Issues Encountered
+- No blocking implementation issues.
+
+### Fixes Applied
+- N/A
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:daily`
+- Result: PASS
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS (regression)
+- Command: `npm run test:risk`
+- Result: PASS (regression)
+- Command: `npm run test:str`
+- Result: PASS (regression)
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 09 is complete and ready for focused commit.
