@@ -12,7 +12,8 @@
     "test:reason": "tsx tests/reasonAboutClusterTool.test.ts",
     "test:risk": "tsx tests/scoreAndExplainRiskTool.test.ts",
     "test:str": "tsx tests/generateSTRTool.test.ts",
-    "test:daily": "tsx tests/dailyTransactionScanJob.test.ts"
+    "test:daily": "tsx tests/dailyTransactionScanJob.test.ts",
+    "test:post": "tsx tests/addNFIUDisclaimer.test.ts"
   },
   "keywords": [],
   "author": "",

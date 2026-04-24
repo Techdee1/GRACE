@@ -380,3 +380,48 @@ Status: Completed
 ### Notes
 - No backend/ or grace-frontend/ files were modified for this task.
 - Task 09 is complete and ready for focused commit.
+
+---
+
+## Task 10 — PostProcessor Disclaimer
+Date: 2026-04-24
+Status: Completed
+
+### Work Completed
+- Implemented compliance postprocessor in `agent/src/processors/addNFIUDisclaimer.ts`.
+- Added trigger-based disclaimer injection for STR/filing/compliance contexts.
+- Added duplicate-protection to avoid repeating disclaimer when already present.
+- Added explicit PENDING_REVIEW wording in appended notice.
+- Exported both function and postprocessor object (`addNFIUDisclaimerPostProcessor`) for integration.
+- Added focused test in `agent/tests/addNFIUDisclaimer.test.ts`.
+- Added npm script `test:post` in `agent/package.json`.
+
+### Issues Encountered
+- No blocking implementation issues.
+
+### Fixes Applied
+- N/A
+
+### Test Evidence
+- Command: `npm run typecheck`
+- Result: PASS
+- Command: `npm run test:post`
+- Result: PASS
+- Command: `npm run test:daily`
+- Result: PASS (regression)
+- Command: `npm run test:parse`
+- Result: PASS (regression)
+- Command: `npm run test:graph`
+- Result: PASS (regression)
+- Command: `npm run test:patterns`
+- Result: PASS (regression)
+- Command: `npm run test:reason`
+- Result: PASS (regression)
+- Command: `npm run test:risk`
+- Result: PASS (regression)
+- Command: `npm run test:str`
+- Result: PASS (regression)
+
+### Notes
+- No backend/ or grace-frontend/ files were modified for this task.
+- Task 10 is complete and ready for focused commit.
