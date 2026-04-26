@@ -11,7 +11,9 @@ import { useGraphLayout } from '@/components/graph/useGraphLayout'
 import { useGraphData } from '@/hooks/useGraphData'
 import { useAlert } from '@/hooks/useAlerts'
 import { toast } from '@/store/toastStore'
+import { agentApi } from '@/api/agent'
 import { strApi } from '@/api/str'
+import { transactionsApi } from '@/api/transactions'
 import { PATTERN_LABELS, formatDateTime, formatNairaShort } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -23,6 +25,7 @@ export default function AlertDetail() {
   const [dismissModal, setDismissModal] = useState(false)
   const [note, setNote] = useState('')
   const [strLoading, setStrLoading] = useState(false)
+  const [agentLoading, setAgentLoading] = useState(false)
   const [reviewerNote, setReviewerNote] = useState('')
 
   const entityIds = alert?.entityIds ?? []
@@ -43,6 +46,71 @@ export default function AlertDetail() {
       console.error(err)
     } finally {
       setStrLoading(false)
+    }
+  }
+
+  const toCsv = (transactions) => {
+    const headers = [
+      'transaction_id',
+      'source_account',
+      'destination_account',
+      'amount',
+      'transaction_date',
+      'description',
+    ]
+
+    const lines = transactions.map((txn) => {
+      const description = (txn.flag || txn.type || '').replaceAll('"', '""')
+      return [
+        txn.id || '',
+        txn.fromEntity || '',
+        txn.toEntity || '',
+        txn.amount ?? '',
+        txn.date || '',
+        `"${description}"`,
+      ].join(',')
+    })
+
+    return [headers.join(','), ...lines].join('\n')
+  }
+
+  const handleRunAgentIntake = async () => {
+    setAgentLoading(true)
+    try {
+      const transactions = await transactionsApi.getByAlert(alert.id)
+      if (!transactions || transactions.length === 0) {
+        toast.info('No transactions found for this alert')
+        return
+      }
+
+      const period = new Date(alert.detectedAt).toISOString().slice(0, 7)
+      const payload = {
+        data: toCsv(transactions),
+        format: 'csv',
+        sensitivity: 'high',
+        reason_mode: 'deterministic',
+        generate_report: true,
+        case_reference: alert.id,
+        reporting_period: period,
+        source: 'dashboard-alert-detail',
+      }
+
+      const result = await agentApi.intake(payload)
+      if (result.success) {
+        if (result.str_draft_id) {
+          toast.success('Agent intake completed and STR draft created')
+          navigate(`/str/${result.str_draft_id}`)
+          return
+        }
+        toast.success('Agent intake completed and report generated')
+      } else {
+        toast.error('Agent intake returned an unsuccessful response')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Agent intake failed')
+    } finally {
+      setAgentLoading(false)
     }
   }
 
@@ -144,6 +212,9 @@ export default function AlertDetail() {
         />
         <Button variant="primary" onClick={handleGenerateSTR} loading={strLoading}>
           {strLoading ? 'Generating STR…' : 'Generate STR'}
+        </Button>
+        <Button variant="secondary" onClick={handleRunAgentIntake} loading={agentLoading}>
+          {agentLoading ? 'Running Agent Intake…' : 'Run Agent Intake'}
         </Button>
       </div>
 

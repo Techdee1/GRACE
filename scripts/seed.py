@@ -24,6 +24,7 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import httpx
 from sqlalchemy import create_engine, select, text
@@ -45,9 +46,15 @@ JOB_TIMEOUT_SECONDS = 300
 
 def _wait_for_api(base_url: str, retries: int = 30, delay: float = 2.0) -> None:
     """Block until /health returns 200 or retries are exhausted."""
+    parts = urlsplit(base_url)
+    base_path = parts.path.rstrip("/")
+    if base_path.endswith("/api/v1"):
+        base_path = base_path.removesuffix("/api/v1")
+    health_url = urlunsplit((parts.scheme, parts.netloc, f"{base_path}/health", "", ""))
+
     for attempt in range(retries):
         try:
-            resp = httpx.get(f"{base_url.rstrip('/api/v1')}/health", timeout=5)
+            resp = httpx.get(health_url, timeout=5)
             if resp.status_code == 200:
                 print(f"[seed] API is ready ({base_url})")
                 return

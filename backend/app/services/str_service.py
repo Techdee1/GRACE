@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -85,4 +86,65 @@ def get_str_draft(db: Session, str_id: UUID) -> STRDraftResponse | None:
     return _to_response(row)
 
 
-__all__ = ["STRGenerationError", "generate_str_draft", "get_str_draft"]
+def create_external_str_draft(
+    db: Session,
+    alert_id: UUID,
+    report_payload: dict,
+    reviewer_notes: str | None,
+    provider: str = "lua-agent",
+    model_name: str = "lua-agent",
+    model_version: str = "transaction-intake",
+) -> STRDraftResponse:
+    alert = db.get(Alert, alert_id)
+    if alert is None:
+        raise ValueError("Alert not found")
+
+    content_text = (
+        report_payload.get("content_text")
+        or report_payload.get("contentText")
+        or report_payload.get("summary")
+    )
+    if not content_text:
+        content_text = json.dumps(report_payload, indent=2, sort_keys=True)
+
+    row = STRDraft(
+        alert_id=alert.id,
+        reviewer_notes=reviewer_notes,
+        provider=provider,
+        model_name=model_name,
+        model_version=model_version,
+        content_json=report_payload,
+        content_text=content_text,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+
+    write_audit_event(
+        db=db,
+        action="str_generated_external",
+        entity_ids=[str(x) for x in alert.entity_ids],
+        alert_id=alert.id,
+        model_version=row.model_version,
+        decision=DecisionStatus.pending,
+        payload_json={
+            "str_id": str(row.id),
+            "alert_id": str(alert.id),
+            "provider": row.provider,
+            "model_name": row.model_name,
+            "model_version": row.model_version,
+            "source": "lua_transaction_intake",
+            "content_json": row.content_json,
+        },
+    )
+    db.commit()
+
+    return _to_response(row)
+
+
+__all__ = [
+    "STRGenerationError",
+    "generate_str_draft",
+    "get_str_draft",
+    "create_external_str_draft",
+]
