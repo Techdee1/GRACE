@@ -17,5 +17,9 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    lua_transaction_intake_webhook_url: str = ""
+    lua_transaction_intake_key: str = ""
+    lua_transaction_intake_timeout_seconds: float = 30.0
+
 
 settings = Settings()

@@ -268,6 +268,6 @@ export const transactionAnalysisSkill = new LuaSkill({
   name: 'transaction-analysis',
   description: 'AML transaction analysis for suspicious pattern detection and risk scoring.',
   context:
-    'Use analyze_transactions as the primary entrypoint to enforce sequencing: parse -> graph -> detect -> reason -> risk. Use individual tools only for focused debug or analyst drill-down.',
+    'Use analyze_transactions as the primary entrypoint to enforce sequencing: parse -> graph -> detect -> reason -> risk. Return findings in clear structured sections (status, candidates, risk, next actions). Prefer channel-ready list-item/actions formatting when supported; otherwise use equivalent markdown.',
   tools: [new AnalyzeTransactionsTool()],
 })

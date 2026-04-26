@@ -168,6 +168,6 @@ export const reportingSkill = new LuaSkill({
   name: 'reporting',
   description: 'Generate NFIU-oriented STR drafts that are always PENDING_REVIEW.',
   context:
-    'Use generate_str_report only when explicit user intent to generate a report is present. Provide either analysis output from analyze_transactions or raw transaction data so report generation can run safely.',
+    'Use generate_str_report only when explicit user intent to generate a report is present. Provide either analysis output from analyze_transactions or raw transaction data so report generation can run safely. Present report highlights in channel-ready structure (status, summary, top entities, next actions). Prefer list-item/actions formatting when supported; otherwise return equivalent markdown sections.',
   tools: [new GenerateSTRReportTool()],
 })

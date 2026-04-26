@@ -22,7 +22,8 @@
     "test:daily": "tsx tests/dailyTransactionScanJob.test.ts",
     "test:post": "tsx tests/addNFIUDisclaimer.test.ts",
     "test:skill-analysis": "tsx tests/transactionAnalysisSkill.test.ts",
-    "test:skill-reporting": "tsx tests/reportingSkill.test.ts"
+    "test:skill-reporting": "tsx tests/reportingSkill.test.ts",
+    "test:webhook-intake": "tsx tests/transactionIntakeWebhook.test.ts"
   },
   "dependencies": {
     "csv-parse": "^6.2.1",

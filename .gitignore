@@ -1,5 +1,7 @@
 .env
 *.env
+.env.local
+*.env.local
 __pycache__/
 *.pyc
 *.pyo
@@ -13,3 +15,5 @@ venv/
 .mypy_cache/
 .ruff_cache/
 *.log
+node_modules/
+agent/.lua/

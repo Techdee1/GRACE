@@ -8,6 +8,7 @@ GRACE is an AI-powered AML/KYC intelligence platform for Nigerian financial inst
 
 - Extracted PRD markdown: [GRACE_PRD.md](GRACE_PRD.md)
 - Source PRD PDF: [ComplianceGraph_PRD.pdf](ComplianceGraph_PRD.pdf)
+- Presentation restore runbook: [docs/PRESENTATION_RUNBOOK.md](docs/PRESENTATION_RUNBOOK.md)
 
 ## Core Concept
 

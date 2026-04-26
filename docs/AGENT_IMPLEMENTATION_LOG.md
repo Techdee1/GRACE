@@ -567,3 +567,63 @@ Status: Completed
 ### Notes
 - Previous production crash path is eliminated for normal two-step threaded usage.
 - Raw CSV prompts still require correctly formatted multiline payloads to avoid parsing failures.
+
+---
+
+## Task 14 — MCP Integration Scaffolding
+Date: 2026-04-26
+Status: Completed
+
+### Work Completed
+- Added MCP server scaffold in `agent/src/mcp/amlIntelMcpServer.ts`.
+- Wired MCP server into agent config via `mcpServers` in `agent/src/index.ts`.
+- Added MCP environment placeholders in `agent/.env.example`:
+  - `AML_INTEL_MCP_URL`
+  - `AML_INTEL_MCP_TOKEN`
+- Verified compiler discovery and manifest output for MCP primitive.
+- Verified lifecycle visibility and state transitions through Lua MCP commands.
+
+### Test Evidence
+- Command: `npm run build && npm run typecheck`
+- Result: PASS
+- Command: `npm run lua:compile`
+- Result: PASS
+  - compile summary includes `1 mcp-server`
+  - manifest includes `kind: "mcp-server"`, `name: "aml-intel-remote"`
+- Command: `npx lua mcp list`
+- Result: PASS (server listed)
+- Command: `npx lua mcp activate aml-intel-remote`
+- Result: PASS
+- Command: `npx lua mcp deactivate aml-intel-remote`
+- Result: PASS
+
+### Notes
+- `push all` reported unrelated pre-existing skill schema conversion errors for older skill entries, while MCP server push succeeded.
+
+---
+
+## Task 15 — Full Regression Gate and Documentation Refresh
+Date: 2026-04-26
+Status: Completed
+
+### Work Completed
+- Executed full regression suite after webhook and MCP updates.
+- Executed production smoke tests for analysis and reporting flow.
+- Updated submission-facing documentation to reflect MCP scaffolding and latest validation status.
+
+### Test Evidence
+- Command: `npm run build && npm run typecheck`
+- Result: PASS
+- Command: `npm run lua:regression`
+- Result: PASS (`NO_CANDIDATES` and `ANALYZED` fixture flows)
+- Command: `npm run test:skill-analysis && npm run test:skill-reporting && npm run test:webhook-intake`
+- Result: PASS
+- Command: `npx lua chat --env production -t task7-smoke -m "Analyze ..."`
+- Result: PASS (`ANALYZED`)
+- Command: `npx lua chat --env production -t task7-smoke -m "Generate the STR report draft now ..."`
+- Result: PASS (`PENDING_REVIEW`)
+- Command: `npx lua mcp list`
+- Result: PASS (`aml-intel-remote` listed)
+
+### Notes
+- Post-upgrade stability is confirmed across local regression and production threaded smoke usage.

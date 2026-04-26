@@ -1,110 +1,53 @@
-# 🚀 Quick Start Guide
+# GRACE Quickstart
 
-You've initialized a minimal Lua AI Agent. Here's how to get started:
+This guide is for validating GRACE quickly in sandbox and production.
 
-## Step 1: Chat with Your Agent
-
-```bash
-lua chat
-```
-
-Select **Sandbox** mode. Your agent is empty but functional - try chatting!
-
-## Step 2: Create Your First Tool
-
-### Create the folders and files:
+## 1) Install
 
 ```bash
-mkdir -p src/skills/tools
+npm install
 ```
 
-### Create a tool (`src/skills/tools/MyTool.ts`):
-
-```typescript
-import { LuaTool } from "lua-cli";
-import { z } from "zod";
-
-export default class MyTool implements LuaTool {
-    name = "my_tool";
-    description = "Does something useful";
-    
-    inputSchema = z.object({
-        input: z.string().describe("What to process")
-    });
-
-    async execute(input: z.infer<typeof this.inputSchema>) {
-        return { result: `Processed: ${input.input}` };
-    }
-}
-```
-
-### Create a skill (`src/skills/my.skill.ts`):
-
-```typescript
-import { LuaSkill } from "lua-cli";
-import MyTool from "./tools/MyTool";
-
-export default new LuaSkill({
-    name: "my-skill",
-    description: "My custom skill",
-    context: "Use these tools when...",
-    tools: [new MyTool()],
-});
-```
-
-### Add to your agent (`src/index.ts`):
-
-```typescript
-import { LuaAgent } from "lua-cli";
-import mySkill from "./skills/my.skill";
-
-const agent = new LuaAgent({
-    name: `My Agent`,
-    persona: `You are a helpful assistant.`,
-    skills: [mySkill],
-});
-```
-
-## Step 3: Test Your Tool
+## 2) Quality Gate
 
 ```bash
-lua test
+npm run build
+npm run typecheck
+npm run lua:regression
+npm run test:skill-analysis
+npm run test:skill-reporting
+npm run test:webhook-intake
 ```
 
-Select your tool and provide test inputs.
+Expected outcomes:
+- Negative fixture: `NO_CANDIDATES`
+- Positive fixture: `ANALYZED`
 
-## Step 4: Deploy
+## 3) Sandbox Smoke Test
 
 ```bash
-lua push all --force --auto-deploy
+npx lua chat --env sandbox -m "Analyze my last transaction"
+npx lua chat --env sandbox -m "Generate a report for the last quarter"
 ```
 
-## 🎓 Need Examples?
-
-Initialize a project with full examples:
+## 4) Production Smoke Test
 
 ```bash
-mkdir my-examples && cd my-examples
-lua init --with-examples
+CSV_DATA=$(tr '\n' ' ' < tests/fixtures/analysis-positive.csv | sed 's/  */ /g')
+
+npx lua chat --env production -t grace-smoke-1 -m "Analyze these transactions and return a structured summary. Data:\n$CSV_DATA"
+npx lua chat --env production -t grace-smoke-1 -m "I explicitly want you to generate the STR report now."
 ```
 
-Or check the documentation: https://docs.heylua.ai/examples
+Expected production outcome:
+- Analysis: `ANALYZED`
+- Reporting: STR draft returned with `PENDING_REVIEW`
 
-## 📖 Commands Reference
+## 5) Deploy
 
-| Command | What it does |
-|---------|-------------|
-| `lua test` | Test tools interactively |
-| `lua chat` | Chat with your agent |
-| `lua compile` | Compile your code |
-| `lua push` | Upload to server |
-| `lua deploy` | Deploy to production |
-| `lua logs` | View logs |
-| `lua env` | Manage environment variables |
-| `lua persona` | Update agent persona |
+```bash
+npx lua push all --force --ci
+npx lua deploy all --force --ci
+npx lua mcp list
+```
 
-## 🔗 Resources
-
-- **Docs:** https://docs.heylua.ai
-- **Examples:** https://docs.heylua.ai/examples
-- **API:** https://docs.heylua.ai/api
