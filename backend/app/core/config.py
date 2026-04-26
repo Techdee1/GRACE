@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     lua_transaction_intake_webhook_url: str = ""
     lua_transaction_intake_key: str = ""
+    lua_transaction_intake_bearer_token: str = ""
     lua_transaction_intake_timeout_seconds: float = 30.0
 
 
