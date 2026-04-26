@@ -28,6 +28,8 @@ def run_agent_intake(
     headers = {'Content-Type': 'application/json'}
     if settings.lua_transaction_intake_key:
         headers['x-intake-key'] = settings.lua_transaction_intake_key
+    if settings.lua_transaction_intake_bearer_token:
+        headers['Authorization'] = f"Bearer {settings.lua_transaction_intake_bearer_token}"
 
     params: dict[str, str] = {}
     if payload.source:
@@ -60,6 +62,13 @@ def run_agent_intake(
             detail = response.json()
         except ValueError:
             pass
+        if response.status_code == status.HTTP_401_UNAUTHORIZED:
+            if isinstance(detail, dict) and str(detail.get('message', '')).lower().strip() == 'no token provided':
+                detail = {
+                    'message': 'Upstream webhook rejected request: no bearer token provided.',
+                    'hint': 'Set LUA_TRANSACTION_INTAKE_BEARER_TOKEN in backend deployment env.',
+                    'upstream': detail,
+                }
         raise HTTPException(status_code=response.status_code, detail=detail)
 
     try:

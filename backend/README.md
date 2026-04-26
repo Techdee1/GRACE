@@ -11,6 +11,7 @@ When `generate_report=true` and `case_reference` is a valid alert UUID, the back
 Required environment variables:
 - `LUA_TRANSACTION_INTAKE_WEBHOOK_URL`
 - `LUA_TRANSACTION_INTAKE_KEY` (optional, if webhook key protection is enabled)
+- `LUA_TRANSACTION_INTAKE_BEARER_TOKEN` (optional, if upstream webhook endpoint requires bearer auth)
 - `LUA_TRANSACTION_INTAKE_TIMEOUT_SECONDS` (optional, default `30`)
 
 How to source these values:
@@ -23,6 +24,7 @@ How to source these values:
 	- `npx lua env production --key INTAKE_WEBHOOK_KEY --value <shared-secret>`
 - Copy the webhook endpoint URL from the Lua dashboard for `transaction-intake` and set it as `LUA_TRANSACTION_INTAKE_WEBHOOK_URL`.
 - Set `LUA_TRANSACTION_INTAKE_KEY` to the same `<shared-secret>` value used for `INTAKE_WEBHOOK_KEY`.
+- If upstream returns `401` with `No token provided`, set `LUA_TRANSACTION_INTAKE_BEARER_TOKEN` in backend deployment env.
 
 Expected request body fields:
 - `data` (required, CSV/JSON string)
