@@ -52,3 +52,12 @@ class IngestJobStatusResponse(BaseModel):
     error_message: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class TransactionResponse(BaseModel):
+    id: UUID
+    fromEntity: UUID
+    toEntity: UUID
+    amount: Decimal
+    date: datetime
+    channel: str | None = None
